@@ -126,7 +126,7 @@ export function createModeration({ onChange, pause, resume, refreshIcons }) {
     select(message) { selected = message; updatePanel(); onChange(); },
     clearSelection() { selected = null; updatePanel(); },
     get selectedIndex() { return selected?.index; },
-    get selected() { return selected; },
+    user: userState,
     get revision() { return state.revision; },
     get awardActive() { return !!state.award; },
     warned: username => !!userState(username)?.warnings,

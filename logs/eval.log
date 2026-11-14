@@ -3,15 +3,16 @@ testing 354 held-out words (fly was taught 1842)
                  smell err  good/neutral/bad  exact action  ban recall  ban precision
 fly                   1.49              0.71          0.27        0.11           0.75
 always neutral        3.00              0.33          0.16        0.00           0.00
+fly + harness         1.44              0.72          0.31        0.11           0.46
 ridge on odor         1.22              0.83          0.42        0.04           1.00
 
 smell err = mean absolute error on the 1-10 scale; good/neutral/bad = balanced accuracy over the three kinds
 
-fly's average answer per true smell level:
-  true  1.0 (MOD AWARD  )  fly says  2.6 +/- 1.4   n=57
-  true  3.0 (-          )  fly says  3.2 +/- 0.9   n=57
-  true  5.0 (WARN       )  fly says  6.1 +/- 1.2   n=57
-  true  6.0 (SLOW 30s   )  fly says  5.6 +/- 1.4   n=55
-  true  7.0 (TIMEOUT 30s)  fly says  6.0 +/- 1.2   n=57
-  true  8.0 (MUTE       )  fly says  6.1 +/- 1.2   n=14
-  true  9.5 (BAN        )  fly says  6.9 +/- 1.3   n=57
+average answer per true smell level:
+  true  1.0 (MOD AWARD  )  fly says  2.6 +/- 1.4   with harness  2.5 +/- 1.7   n=57
+  true  3.0 (-          )  fly says  3.2 +/- 0.9   with harness  3.3 +/- 1.1   n=57
+  true  5.0 (WARN       )  fly says  6.1 +/- 1.2   with harness  6.5 +/- 1.3   n=57
+  true  6.0 (SLOW 30s   )  fly says  5.6 +/- 1.4   with harness  5.9 +/- 1.5   n=55
+  true  7.0 (TIMEOUT 30s)  fly says  6.0 +/- 1.2   with harness  6.3 +/- 1.3   n=57
+  true  8.0 (MUTE       )  fly says  6.1 +/- 1.2   with harness  6.6 +/- 1.3   n=14
+  true  9.5 (BAN        )  fly says  6.9 +/- 1.3   with harness  7.2 +/- 1.2   n=57

@@ -15,9 +15,9 @@ test('tokenize lowercases, squeezes stretched letters and keeps only word charac
   assert.deepEqual(tokenize('😂😂😂'), []);
 });
 
-test('the worst word decides a stinking message; otherwise the average does', () => {
+test('the worst word decides a stinking message, else a lovely word earns the award, else the average', () => {
   const smells = new Map([['nice', 1], ['play', 2], ['rotten', 9], ['meh', 4]]);
-  assert.deepEqual(judge('nice play', smells, thresholds), { stink: 1.5, label: 'MOD AWARD', action: 'mod-award', worst: null, unsniffed: false });
+  assert.deepEqual(judge('nice meh', smells, thresholds), { stink: 1, label: 'MOD AWARD', action: 'mod-award', worst: null, unsniffed: false });
   assert.deepEqual(judge('nice rotten play', smells, thresholds), { stink: 9, label: 'BAN', action: 'ban', worst: 'rotten', unsniffed: false });
   assert.equal(judge('meh play', smells, thresholds).action, null);
   assert.equal(judge('😂', smells, thresholds).stink, 3);
@@ -26,7 +26,7 @@ test('the worst word decides a stinking message; otherwise the average does', ()
 test('a message waits for all its words, and an unsmellable word counts as neutral', () => {
   assert.equal(judge('nice mystery', new Map([['nice', 1]]), thresholds), null);
   const verdict = judge('nice mystery', new Map([['nice', 1], ['mystery', null]]), thresholds);
-  assert.equal(verdict.stink, 2);
+  assert.equal(verdict.stink, 1);
   assert.equal(verdict.unsniffed, true);
 });
 

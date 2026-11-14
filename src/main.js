@@ -22,20 +22,20 @@ catch(error){$('loading').textContent='3D rendering is unavailable. Enable WebGL
 function format(seconds){if(!Number.isFinite(seconds))return '0:00';const s=Math.max(0,Math.floor(seconds));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
 function currentMessages(){return [...visibleMessages(messages,video.currentTime,offset),...manualMessages.filter(m=>m.time<=video.currentTime)].sort((a,b)=>a.time-b.time||a.index-b.index);}
 function renderChat(force=false){
-  const visible=moderation.filter(currentMessages());room?.update(visible);fly.observe(visible);
-  $('fly-verdict').textContent=fly.describe(moderation.selected);
+  const visible=moderation.filter(currentMessages());room?.update(visible);fly.observe(visible);inputState();
   const filter=$('chat-filter').value;
   const filtered=visible.filter(m=>(filter==='all'||assignedTo(m.index,count)===+filter)&&(!query||`${m.user} ${m.text}`.toLowerCase().includes(query)));
-  const key=filtered.map(m=>m.index).join(',')+':'+filter+':'+query+':'+moderation.revision+':'+moderation.selectedIndex+':'+filtered.filter(m=>m.verdict).length;
+  const notices=query?[]:fly.notices.filter(n=>n.time<=video.currentTime-(n.manual?0:offset)&&(filter==='all'||n.fly===+filter));
+  const lines=[...filtered,...notices].sort((a,b)=>a.time-b.time||a.index-b.index);
+  const key=lines.map(m=>m.index).join(',')+':'+filter+':'+query+':'+moderation.revision+':'+filtered.filter(m=>m.verdict).length;
   $('chat-count').textContent=filtered.length;
   if(!force&&lastChatKey===key)return;lastChatKey=key;
   const fragment=document.createDocumentFragment();
-  for(const m of filtered.slice(-500)){const line=document.createElement('div');line.className='chat-message';line.dataset.index=m.index;
-    line.tabIndex=0;line.setAttribute('role','button');line.setAttribute('aria-pressed',String(m.index===moderation.selectedIndex));
-    line.onclick=()=>moderation.select(m);line.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();moderation.select(m);}};
+  for(const m of lines.slice(-500)){const line=document.createElement('div');line.className=m.notice?'chat-notice':'chat-message';line.dataset.index=m.index;
+    if(m.notice){line.textContent=m.notice;fragment.append(line);continue;}
+    line.title=fly.describe(m);
     const stamp=document.createElement('span');stamp.className='timestamp';stamp.textContent=format(m.time);line.append(stamp);
     const user=document.createElement('b');user.textContent=m.user;user.style.color=userColor(m.user);line.append(user,document.createTextNode(`: ${m.text}`));
-    const smell=fly.badge(m);if(smell)line.append(smell);
     if(moderation.warned(m.user)){const badge=document.createElement('span');badge.className='warned-badge';badge.textContent='Warned';line.append(badge);}
     fragment.append(line);}
   const oldScroll=$('chat-messages').scrollTop;$('chat-messages').replaceChildren(fragment);$('chat-messages').scrollTop=autoScroll?$('chat-messages').scrollHeight:oldScroll;
@@ -64,7 +64,11 @@ $('chat-users').onclick=()=>room?.focus(((room.focused??-1)+1)%count);
 $('chat-messages').addEventListener('scroll',()=>{const el=$('chat-messages');autoScroll=el.scrollHeight-el.clientHeight-el.scrollTop<35;$('resume-chat').hidden=autoScroll;});
 $('resume-chat').onclick=()=>{autoScroll=true;$('chat-messages').scrollTop=$('chat-messages').scrollHeight;$('resume-chat').hidden=true;};
 $('search').oninput=e=>{query=e.target.value.toLowerCase().trim();renderChat(true);};$('search-button').onclick=()=>$('search').focus();
-function sendMessage(){const text=$('message-input').value.trim();if(!text)return;const sent={user:'you',text,time:video.currentTime,index:messages.length+manualMessages.length,stamp:''};manualMessages.push(sent);fly.load([sent]);$('message-input').value='';autoScroll=true;renderChat(true);}
+function inputState(){const me=moderation.user('you'),left=me?Math.ceil((me.timeoutUntil-Date.now())/1000):0;
+  const blocked=me?.banned?'You are banned from this chat.':me?.muted?'You are muted in this chat.':left>0?`You are timed out for ${left}s.`:'';
+  $('message-input').disabled=$('send-message').disabled=!!blocked;$('message-input').placeholder=blocked||'Send a message';}
+setInterval(()=>inputState(),500);
+function sendMessage(){const text=$('message-input').value.trim();if(!text||$('message-input').disabled)return;const sent={user:'you',text,time:video.currentTime,index:messages.length+manualMessages.length,stamp:''};manualMessages.push(sent);fly.load([sent]);$('message-input').value='';autoScroll=true;renderChat(true);}
 $('send-message').onclick=sendMessage;$('message-input').onkeydown=e=>{if(e.key==='Enter')sendMessage();};$('emoji').onclick=()=>{$('message-input').value+='🙂';$('message-input').focus();};
 function sidebar(){document.body.classList.toggle('sidebar-collapsed');}function toggleChat(){const hidden=document.body.classList.toggle('chat-collapsed');$('show-chat').hidden=!hidden;}
 $('collapse-sidebar').onclick=sidebar;$('theater').onclick=()=>{document.body.classList.toggle('sidebar-collapsed');toggleChat();};
@@ -78,7 +82,7 @@ $('following').onclick=()=>{document.body.classList.remove('sidebar-collapsed');
 $('browse').onclick=()=>{$('browse').classList.add('active');$('following').classList.remove('active');$('player').scrollIntoView({behavior:'smooth'});};
 $('more').onclick=()=>document.querySelector('.settings-card').scrollIntoView({behavior:'smooth'});
 $('channel').onclick=()=>$('player').scrollIntoView({behavior:'smooth'});
-function loadChat(text,name){const parsed=parseChat(text);if(!parsed.length){status('No messages found in this file.');return;}messages=parsed;manualMessages=[];moderation.clearSelection();$('chat-filename').textContent=name;$('chat-status').textContent=name;$('message-total').textContent=`${messages.length.toLocaleString()} messages`;status('');autoScroll=true;renderChat(true);fly.load(messages);}
+function loadChat(text,name){const parsed=parseChat(text);if(!parsed.length){status('No messages found in this file.');return;}messages=parsed;manualMessages=[];fly.clear();$('chat-filename').textContent=name;$('chat-status').textContent=name;$('message-total').textContent=`${messages.length.toLocaleString()} messages`;status('');autoScroll=true;renderChat(true);fly.load(messages);}
 $('chat-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{loadChat(await file.text(),file.name);}catch{status('Unable to read this chat file.');}e.target.value='';};
 $('video-file').onchange=e=>{const file=e.target.files[0];if(!file)return;video.pause();if(videoObjectUrl)URL.revokeObjectURL(videoObjectUrl);videoObjectUrl=URL.createObjectURL(file);video.src=videoObjectUrl;for(const id of ['video-filename','video-status','inset-label'])$(id).textContent=file.name;status('');e.target.value='';};
 const moderation=createModeration({onChange:()=>renderChat(true),pause:()=>video.pause(),resume:play,refreshIcons});

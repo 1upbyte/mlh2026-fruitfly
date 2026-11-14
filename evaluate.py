@@ -15,6 +15,7 @@ import sys
 import numpy as np
 
 from flymod.fly import Fly
+from flymod.harness import Harness
 from flymod.moderator import action_for
 from flymod.words import load_vocabulary
 
@@ -46,6 +47,9 @@ print(f"testing {len(held_out)} held-out words (fly was taught {len(taught)})")
 
 # --- the three contestants -------------------------------------------------------
 predictions = {"fly": fly.smell(held_out), "always neutral": np.full(len(truth), 3.0)}
+# The harness's calibration curve only. Its slur list is left out here: looking
+# held-out profanity up in the list it came from would not be a test.
+predictions["fly + harness"] = Harness().calibrate(predictions["fly"])
 
 X_train, y_train = fly.nose.features(fly.dictionary), np.array([vocab[w] for w in fly.dictionary])
 X_test = fly.nose.features(held_out)
@@ -71,7 +75,8 @@ for name, pred in predictions.items():
           f"{recall:11.2f} {precision:14.2f}")
 
 print("\nsmell err = mean absolute error on the 1-10 scale; good/neutral/bad = balanced accuracy over the three kinds")
-print("\nfly's average answer per true smell level:")
+print("\naverage answer per true smell level:")
 for s in sorted(set(truth)):
-    got = predictions["fly"][truth == s]
-    print(f"  true {s:4.1f} ({action_for(s):11s})  fly says {got.mean():4.1f} +/- {got.std():.1f}   n={len(got)}")
+    got, fixed = predictions["fly"][truth == s], predictions["fly + harness"][truth == s]
+    print(f"  true {s:4.1f} ({action_for(s):11s})  fly says {got.mean():4.1f} +/- {got.std():.1f}   "
+          f"with harness {fixed.mean():4.1f} +/- {fixed.std():.1f}   n={len(got)}")

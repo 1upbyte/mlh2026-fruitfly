@@ -22,8 +22,9 @@ export function judge(text, smells, thresholds) {
   if (values.length) {
     const top = Math.max(...values);
     const stinksFrom = thresholds.punishments.at(-1)[0];
-    stink = top >= stinksFrom ? top : values.reduce((sum, value) => sum + value, 0) / values.length;
-    if (top >= stinksFrom) worst = words[values.indexOf(top)];
+    const best = Math.min(...values);
+    if (top >= stinksFrom) { stink = top; worst = words[values.indexOf(top)]; }
+    else stink = best <= thresholds.award_up_to ? best : values.reduce((sum, value) => sum + value, 0) / values.length;
   }
   const label = actionFor(stink, thresholds);
   return { stink, label, action: label && API_ACTION[label], worst, unsniffed: words.some(word => smells.get(word) === null) };

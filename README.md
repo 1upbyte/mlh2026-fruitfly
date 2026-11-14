@@ -1,35 +1,51 @@
 # Fly Mod
 
 A fruit fly's smell circuit, taken from the real connectome, moderates Twitch chat.
-Each word becomes an odor. The fly is taught 100 words by reward and punishment,
-then rates words it has never smelled on a 1-10 scale (1 lovely, 10 foul), and the
-worst smell in a message decides the action.
+Each word becomes an odor. The fly is taught 1,842 words by reward and punishment,
+then rates words it has never smelled on a 1-10 scale (1 lovely, 10 foul). A
+harness re-aligns those smells, and the worst (or best) smell in a message
+decides the action.
 
-**Status: implemented, not yet trained.** `train.py` has never been run, so its
-learning-rate defaults are untuned and there are no accuracy numbers yet.
+**Status: trained.** On 354 held-out words (`logs/eval.log`):
+
+| | Smell error (1-10 scale) | Good / neutral / bad accuracy | Exact action |
+|---|---|---|---|
+| Fly | 1.49 | 0.71 | 0.27 |
+| Fly + harness curve | 1.44 | 0.72 | 0.31 |
+| Always neutral | 3.00 | 0.33 | 0.16 |
+| Linear model on the same odors | 1.22 | 0.83 | 0.42 |
+
+The fly ranks good < neutral < bad well, but barely ranks bad words by severity.
 
 ## Run it
 
+The trained fly (`trained_fly.npz`, `data/nose.npz`) is in the repo, so nothing
+needs retraining. Python is managed with [uv](https://docs.astral.sh/uv/):
+
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+uv sync                      # add --extra gpu on a Linux machine with an NVIDIA GPU
+npm install
+npm run dev                  # the web app, with the fly moderating
 ```
 
 ```bash
-.venv/bin/python train.py
+uv run python moderate.py xqc1.txt
+uv run python moderate.py --say "gg wonderful stream"
+uv run python evaluate.py
 ```
 
-```bash
-.venv/bin/python evaluate.py
-```
+To train again (about 12 minutes on an L40S GPU; hours on a CPU), then refresh
+the harness curve and the web app's smell table:
 
 ```bash
-.venv/bin/python moderate.py xqc1.txt
+uv run python train.py
+uv run python calibrate.py
+uv run python moderate.py xqc1.txt --json xqc1.fly.json
 ```
 
 The first run downloads about 200 MB into `data/` (connectome, neuron labels,
-word list, text model). No FlyWire token is needed. Measured on an M-series
-laptop, sniffing takes about 0.16 s per word, so one training epoch (every word
-twice) is roughly 30 s and the default 20 epochs roughly 11 minutes.
+word list, text model). No FlyWire token is needed. On a CPU, sniffing takes
+about 0.16 s per word; on the GPU, about 0.02 s.
 
 ## How it works
 
@@ -37,9 +53,10 @@ twice) is roughly 30 s and the default 20 epochs roughly 11 minutes.
 |---|---|---|
 | Word → odor | Text embedding → 53 numbers → firing rates of the 53 kinds of smell receptor | `flymod/nose.py` |
 | Odor → brain | 200 ms of spiking simulation through 9,039 real neurons | `flymod/brain.py` |
-| Brain → smell | Balance of "avoid" vs "approach" output neurons → smell index 1-10 | `flymod/fly.py` |
-| Teaching | Dopamine neurons fire in proportion to the fly's error and weaken the active synapses | `flymod/fly.py` |
-| Message → action | Worst word if anything stinks, else the average | `flymod/moderator.py` |
+| Brain → smell | Balance of the synaptic drive onto "avoid" vs "approach" output neurons → smell index 1-10 | `flymod/fly.py` |
+| Teaching | Dopamine neurons move away from their tonic rate in proportion to the fly's error; more dopamine weakens the active synapses, less strengthens them | `flymod/fly.py` |
+| Harness | Re-aligns the smells without touching the fly (below) | `flymod/harness.py` |
+| Message → action | Worst word if anything stinks, else the best word if it earns a Mod Award, else the average | `flymod/moderator.py` |
 
 | Big stink | Action |
 |---|---|
@@ -49,6 +66,41 @@ twice) is roughly 30 s and the default 20 epochs roughly 11 minutes.
 | ≥ 5.5 | Slow 30s |
 | ≥ 4.5 | Warn |
 | ≤ 1.5 | Mod Award |
+
+### The harness
+
+The fly's raw smells bunch up in the middle of the scale, and chat laughter it
+never met can smell foul. `flymod/harness.py` corrects that after the fly has
+answered; the fly's synapses are not changed.
+
+1. **Calibration curve.** A never-decreasing curve from what the fly says to
+   what such words are labelled, fitted by `calibrate.py` on the training
+   dictionary and stored in `flymod/harness.json`. It stretches both ends, so
+   very good words can reach a Mod Award.
+2. **Slurs.** A word the profanity list marks as a slur smells at least as bad
+   as its label, and never better than Mute.
+3. **Ordinary words.** Laughter ("lol", "lmao" and variants) and the words in
+   `good_words.txt` / `neutral_words.txt` never smell worse than neutral.
+4. **Unlisted words.** Any other word the profanity list has never heard of
+   earns a Warn at most.
+
+`moderate.py --raw` shows the fly without the harness.
+
+### What changed to make the fly learn
+
+The first training run (100 words, depression-only rule, spike-count readout)
+learned backwards. Measured causes and fixes:
+
+- The learning rate was about 100x too high, and with weakening as the only
+  change both output pools collapsed. Dopamine now has a tonic rate and moves
+  synapses both ways around it.
+- Only about 18 of the 96 output neurons spike, and 11% of words make no
+  approach neuron spike, so a spike-count balance was undefined or extreme.
+  The balance is now read from the synaptic drive onto those neurons, which
+  their spikes follow (r = 0.97).
+- A Kenyon cell's effect on learning is its share of the trial's activity, so
+  loud and faint odors teach equally fast.
+- 100 words was too few. The dictionary is now 1,842 words.
 
 ### What comes from the repo
 
@@ -86,15 +138,16 @@ about 8% of Kenyon cells per word and distinct patterns for different words:
   (GPL-3.0, and it is a list of slurs).
 - Good words (smell 1) and neutral words (smell 3): `flymod/good_words.txt` and
   `flymod/neutral_words.txt`, written for this project.
-- The dictionary is 20 good, 20 neutral and 12 words at each bad level.
+- The dictionary is 190 good, 560 neutral and 300 / 160 / 300 / 32 / 300 words
+  at the five bad levels (`DICTIONARY_MIX` in `flymod/words.py`).
+- `trained_fly.npz` stores that dictionary, so the file contains slurs.
 
 ## Known limits
 
-- **100 words is thin.** A plain linear model taught the same 100 words
-  separates good / neutral / bad about 72% of the time on the full text
-  embedding and about 60% on the 53 receptor inputs the fly actually gets, and
-  it can barely rank bad words by severity. Expect the fly to be near or below
-  that; `evaluate.py` prints the comparison.
+- **It over-warns.** On `xqc1.txt` the fly warns 53 of 140 messages, mostly
+  for unlisted words such as emote names. The harness keeps those at Warn.
+- **Severity is flat.** Held-out Ban-level words average 6.9 from the fly
+  (7.2 with the curve), so bans come almost only from the harness's slur list.
 - Words only: no context, no phrases, no spacing tricks.
 - Mod Awards fire at ≤ 1.5 rather than the planned ≤ 1, because the fly's
   output is a noisy number that would almost never land on exactly 1.
@@ -115,7 +168,11 @@ Files stay in the browser. The interface uses Three.js and Lucide icons.
 
 ## Moderation
 
-Select a message in chat, then use Ban, Mute, Timeout 30s, Warn, or Mod Award. Ban and mute hide all past and future messages for that username in chat and on the flies' monitors. Timeout does the same for 30 seconds of real time, including while playback is paused. Usernames match without regard to case. Warn adds a warning badge without hiding messages. Slow 30s toggles a global per-user cooldown, measured using message timestamps, keeping at most one message per user in each 30-second interval. Message indices remain unchanged, so moderation preserves fly assignments.
+The page is a chat viewer's view. The trained flies moderate: each message is judged as it appears, by the fly it is assigned to, and the action is applied through the local API. Chat shows what a viewer would see ("user has been timed out for 30 seconds."); warnings are private, so you only see your own. Messages you type are judged too, and a ban, mute or timeout disables your chat box. Hover a message to see its smell. Under Session, "Fly mod on" switches the flies off and Reset lifts every punishment.
+
+Word smells for the example chat ship in `xqc1.fly.json`. Any other word (a typed message, an uploaded chat) is sniffed by `fly_server.py`, which the server starts on demand; if Python or `trained_fly.npz` is missing, those words count as neutral.
+
+Ban and mute hide all past and future messages for that username in chat and on the flies' monitors. Timeout does the same for 30 seconds of real time, including while playback is paused. Usernames match without regard to case. Warn adds a warning badge without hiding messages. Slow 30s toggles a global per-user cooldown, measured using message timestamps, keeping at most one message per user in each 30-second interval. Message indices remain unchanged, so moderation preserves fly assignments.
 
 Mod Award pauses video and chat and presents the selected username and message over the room, with a trophy, rays, and confetti. Resume stream dismisses the award and continues playback; the close button dismisses it while leaving playback paused. Reset clears moderation and active awards. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
 
@@ -133,6 +190,7 @@ All endpoints are unauthenticated, with CORS enabled for this local demo. The ba
 | `POST /api/mod-award` | `{"username":"example","message":"Great message","messageId":0}` | Pause connected players and show the award. `messageId` is optional. |
 | `POST /api/dismiss-award` | `{"awardId":"id from state.award.id"}` | Dismiss that award; players remain paused. |
 | `POST /api/reset` | `{}` | Clear moderation and awards. |
+| `POST /api/fly/smell` | `{"words":["gg","lol"]}` | Smell of each word after the harness, plus the action thresholds. `null` for a word nobody could sniff. |
 | `GET /api/state` | — | Read the current session, users, slow mode, and active award. |
 | `GET /api/events` | — | Subscribe to server-sent state updates, including an initial snapshot. |
 

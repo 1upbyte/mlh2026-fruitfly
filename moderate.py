@@ -5,8 +5,9 @@
     python moderate.py xqc1.txt --csv out.csv   # also write every verdict to a file
     python moderate.py xqc1.txt --json xqc1.fly.json   # word smells for the web app
 
-Every distinct word is sniffed once. A message's big stink is its worst word
-if anything stinks, otherwise the average of its words.
+Every distinct word is sniffed once and passed through the harness
+(flymod/harness.py). A message's big stink is its worst word if anything
+stinks, else its best word if that earns a Mod Award, else the average.
 """
 import argparse
 import collections
@@ -26,6 +27,7 @@ ap.add_argument("--fly", default="trained_fly.npz")
 ap.add_argument("--naive", action="store_true", help="use an untrained fly (plumbing check; everything is neutral-ish)")
 ap.add_argument("--limit", type=int, default=0, help="only the first N log lines")
 ap.add_argument("--all", action="store_true", help="print every message, not just the ones acted on")
+ap.add_argument("--raw", action="store_true", help="skip the harness: punish on the fly's own smells")
 ap.add_argument("--csv", help="write all verdicts here")
 ap.add_argument("--json", help="write the smell of every word here (read by the web app)")
 args = ap.parse_args()
@@ -45,7 +47,7 @@ else:
         sys.exit(f"{args.fly} not found: run `python train.py` first (or pass --naive)")
     fly.load(args.fly)
 
-mod = Moderator(fly)
+mod = Moderator(fly, raw=args.raw)
 verdicts = mod.judge([text for _, _, text in rows])
 
 taught = set(fly.dictionary)
