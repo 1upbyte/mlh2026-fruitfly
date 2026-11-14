@@ -1,0 +1,16 @@
+vocabulary: 3343 labelled words -> 1842 in the dictionary, 1501 held out
+fly: 9039 neurons, 62261 plastic KC->MBON synapses, 40 avoid / 56 approach MBONs
+epoch   1/12  dictionary smell error 2.00  mean synapse strength 0.892
+epoch   2/12  dictionary smell error 1.61  mean synapse strength 0.852
+epoch   3/12  dictionary smell error 1.53  mean synapse strength 0.827
+epoch   4/12  dictionary smell error 1.46  mean synapse strength 0.810
+epoch   5/12  dictionary smell error 1.44  mean synapse strength 0.796
+epoch   6/12  dictionary smell error 1.41  mean synapse strength 0.787
+epoch   7/12  dictionary smell error 1.42  mean synapse strength 0.776
+epoch   8/12  dictionary smell error 1.36  mean synapse strength 0.766
+epoch   9/12  dictionary smell error 1.37  mean synapse strength 0.758
+epoch  10/12  dictionary smell error 1.36  mean synapse strength 0.752
+epoch  11/12  dictionary smell error 1.35  mean synapse strength 0.746
+epoch  12/12  dictionary smell error 1.35  mean synapse strength 0.741
+trained in 744s -> trained_fly.npz
+next: python evaluate.py   |   python moderate.py xqc1.txt

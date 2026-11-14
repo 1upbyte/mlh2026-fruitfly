@@ -3,7 +3,7 @@
 .mod-heading h3{font-size:11px;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:.3px}
 .mod-connection{width:6px;height:6px;border-radius:50%;background:#85858f}
 .mod-connection.connected{background:#00c884}
-.mod-heading>button{margin-left:auto;font-size:10px;color:#adadb8;padding:2px 4px;border-radius:3px}
+.mod-heading>button{font-size:10px;color:#adadb8;padding:2px 4px;border-radius:3px}
 .mod-heading>button:hover{background:#ffffff12}
 .mod-target{padding:8px 10px;background:#ffffff06;border:1px solid #ffffff12;border-radius:4px;margin-bottom:9px;min-height:33px}
 .mod-target b{font-size:12px;color:#bf94ff;overflow-wrap:anywhere}
@@ -48,3 +48,13 @@
 @keyframes award-burst{0%{opacity:0;transform:rotate(var(--angle)) translateY(0) rotate(0)}10%{opacity:1}65%{opacity:1}100%{opacity:0;transform:rotate(var(--angle)) translateY(var(--distance)) rotate(300deg)}}
 @media(max-width:720px){.chat-panel{height:640px}.award-card{padding:12px 6px}.award-trophy{width:36px;height:36px;margin-bottom:7px}.award-trophy svg{width:21px;height:21px}.award-card h2{font-size:9px;letter-spacing:2px;margin-bottom:6px}.award-card h3{font-size:18px;margin-bottom:8px}.award-card blockquote{padding:8px;font-size:12px;margin-bottom:10px;max-height:55px}.award-card .primary-button{padding:6px 10px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){.celebrate .award-card,.celebrate .award-trophy,.celebrate .award-rays,.celebrate .award-particles span{animation:none}}
+.mod-heading>#fly-auto{margin-left:auto;color:#adadb8;border:1px solid #ffffff1f}
+.mod-heading>#fly-auto[aria-pressed=true]{color:#58e6b1;border-color:#58e6b160;background:#58e6b112}
+.stink-badge{display:inline-block;font-size:9px;font-variant-numeric:tabular-nums;border-radius:3px;padding:0 3px;margin-left:5px;line-height:1.5;color:#85858f;border:1px solid #ffffff1a}
+.stink-badge[data-level=bad]{color:#ff8280;border-color:#ff828060}
+.stink-badge[data-level=good]{color:#ffdc85;border-color:#d6a74260}
+.fly-verdict,.fly-note{font-size:10px;line-height:1.5;margin:8px 0 0;color:#adadb8;overflow-wrap:anywhere}
+.fly-verdict:empty,.fly-note:empty,.fly-log:empty{display:none}
+.fly-log{list-style:none;margin:8px 0 0;padding:6px 8px;background:#ffffff06;border:1px solid #ffffff12;border-radius:4px;font-size:10px;line-height:1.6;color:#adadb8}
+.fly-log li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fly-log b{color:#ff8280}.fly-log b[data-action=warn],.fly-log b[data-action=slow]{color:#e5b75b}.fly-log b[data-action=mod-award]{color:#ffdc85}

@@ -41,7 +41,7 @@
     <section class="settings-card"><div class="settings-title"><h3>Session</h3><span id="message-total">0 messages</span></div><div class="settings-row"><div><label for="chat-file">Chat log</label><p id="chat-status">xqc1.txt</p></div><button class="secondary-button" id="load-chat"><i data-lucide="upload"></i> Load chat</button></div><div class="settings-row"><div><label for="video-file">Stream video</label><p id="video-status">xqc1.mp4</p></div><button class="secondary-button" id="load-video"><i data-lucide="upload"></i> Load video</button></div><div class="settings-row"><label for="offset">Chat offset <span class="muted">(seconds)</span></label><input id="offset" type="number" value="0" step="0.1" aria-label="Chat offset in seconds"></div><p class="status" id="status" role="status"></p></section>
   </main>
   <aside class="chat-panel" id="chat-panel"><header class="chat-header"><button class="icon-button" id="collapse-chat" aria-label="Hide chat"><i data-lucide="panel-right-close"></i></button><h2>STREAM CHAT</h2><button class="icon-button" id="chat-users" aria-label="Focus fly"><i data-lucide="users"></i></button></header><div class="chat-replay"><i data-lucide="history"></i> Chat replay</div><div class="chat-messages" id="chat-messages" role="log" aria-label="Chat messages"></div><button class="resume-chat" id="resume-chat" hidden>Resume scrolling <i data-lucide="arrow-down"></i></button><section class="moderation-panel" aria-label="Moderation actions">
-      <div class="mod-heading"><h3>Moderation</h3><span id="mod-connection" class="mod-connection" aria-label="API connection"></span><button id="mod-reset">Reset</button></div>
+      <div class="mod-heading"><h3>Moderation</h3><span id="mod-connection" class="mod-connection" aria-label="API connection"></span><button id="fly-auto" aria-pressed="true" title="Let the trained fly moderate chat as it plays">Fly mod on</button><button id="mod-reset">Reset</button></div>
       <div class="mod-target"><b id="mod-selected-user">Select a message</b><p id="mod-selected-message"></p></div>
       <div class="mod-actions">
         <button data-mod-action="ban" disabled><i data-lucide="ban"></i>Ban</button>
@@ -52,7 +52,10 @@
         <button data-mod-action="mod-award" class="mod-award-button" disabled><i data-lucide="trophy"></i>Mod Award</button>
       </div>
       <p class="mod-user-state" id="mod-user-state" role="status"></p>
+      <p class="fly-verdict" id="fly-verdict"></p>
       <p class="mod-error" id="mod-error" role="alert"></p>
+      <ul class="fly-log" id="fly-log" aria-label="Fly moderation log"></ul>
+      <p class="fly-note" id="fly-note" role="status"></p>
     </section>
     <div class="chat-footer"><div class="chat-filter"><i data-lucide="list-filter"></i><select id="chat-filter" aria-label="Filter chat by fly"><option value="all">All messages</option><option value="0">Fly 1</option></select><span id="chat-count">0</span></div><div class="chat-input"><input id="message-input" placeholder="Send a message" aria-label="Send a message"><button class="icon-button" id="emoji" aria-label="Insert smile"><i data-lucide="smile"></i></button></div><div class="chat-footer-bottom"><button class="icon-button" id="chat-settings" aria-label="Session settings"><i data-lucide="settings"></i></button><button class="primary-button" id="send-message">Chat</button></div></div></aside>
   <button class="show-chat icon-button" id="show-chat" aria-label="Show chat" hidden><i data-lucide="panel-right-open"></i></button>

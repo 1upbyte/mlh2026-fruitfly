@@ -1,10 +1,10 @@
-"""Train the fly on a 100-word dictionary.
+"""Train the fly on its dictionary.
 
-    python train.py                     # default: 20 epochs, saves trained_fly.npz
-    python train.py --epochs 40 --lr 0.001 --seed 1
+    python train.py                     # default: 12 epochs, saves trained_fly.npz
+    python train.py --epochs 20 --lr 0.5 --seed 1
 
-The dictionary is drawn from the labelled vocabulary (20 good, 20 neutral,
-12 at each of the five profanity levels). Every other labelled word is held
+The dictionary is drawn from the labelled vocabulary (see DICTIONARY_MIX in
+flymod/words.py). Every other labelled word is held
 out for evaluate.py. Slurs are never printed; pass --show-dictionary to see
 the words.
 """
@@ -15,10 +15,10 @@ from flymod.fly import Fly
 from flymod.words import load_vocabulary, split_dictionary
 
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-ap.add_argument("--epochs", type=int, default=20)
-ap.add_argument("--lr", type=float, default=0.002, help="how much dopamine weakens an active synapse")
-ap.add_argument("--recovery", type=float, default=0.0005, help="how fast unused synapses drift back")
-ap.add_argument("--seed", type=int, default=0, help="which 100 words go in the dictionary")
+ap.add_argument("--epochs", type=int, default=12)
+ap.add_argument("--lr", type=float, default=1.0, help="how much a dopamine surprise changes an active synapse")
+ap.add_argument("--recovery", type=float, default=0.0, help="how fast synapses drift back to the connectome")
+ap.add_argument("--seed", type=int, default=0, help="which words go in the dictionary")
 ap.add_argument("--out", default="trained_fly.npz")
 ap.add_argument("--show-dictionary", action="store_true")
 args = ap.parse_args()

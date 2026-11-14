@@ -3,6 +3,7 @@
     python moderate.py xqc1.txt                 # replay a chat log ([h:mm:ss] user: message)
     python moderate.py --say "gg well played"   # judge one message
     python moderate.py xqc1.txt --csv out.csv   # also write every verdict to a file
+    python moderate.py xqc1.txt --json xqc1.fly.json   # word smells for the web app
 
 Every distinct word is sniffed once. A message's big stink is its worst word
 if anything stinks, otherwise the average of its words.
@@ -10,11 +11,12 @@ if anything stinks, otherwise the average of its words.
 import argparse
 import collections
 import csv
+import json
 import os
 import sys
 
 from flymod.fly import Fly
-from flymod.moderator import Moderator, read_chat_log
+from flymod.moderator import THRESHOLDS, Moderator, read_chat_log
 from flymod.words import tokenize
 
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -25,6 +27,7 @@ ap.add_argument("--naive", action="store_true", help="use an untrained fly (plum
 ap.add_argument("--limit", type=int, default=0, help="only the first N log lines")
 ap.add_argument("--all", action="store_true", help="print every message, not just the ones acted on")
 ap.add_argument("--csv", help="write all verdicts here")
+ap.add_argument("--json", help="write the smell of every word here (read by the web app)")
 args = ap.parse_args()
 if not args.log and not args.say:
     ap.error("give a chat log or --say a message")
@@ -65,3 +68,8 @@ if args.csv:
             out.writerow([when, user, v.text, f"{v.stink:.2f}", v.action,
                           " ".join(f"{w}={s:.1f}" for w, s in v.words.items())])
     print(f"wrote {args.csv}")
+
+if args.json:
+    with open(args.json, "w", encoding="utf-8") as f:
+        json.dump({"thresholds": THRESHOLDS, "smells": {w: round(s, 2) for w, s in sorted(mod.known.items())}}, f)
+    print(f"wrote {args.json}")

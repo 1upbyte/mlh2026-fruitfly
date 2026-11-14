@@ -1,0 +1,13 @@
+[project]
+name = "flymod"
+version = "0.1.0"
+description = "A fruit fly's smell circuit moderates Twitch chat"
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "pandas", "pyarrow", "fastembed"]
+
+[project.optional-dependencies]
+# NVIDIA GPU simulator (Linux). Bundles the CUDA 12 runtime libraries.
+gpu = ["cupy-cuda12x[ctk]"]
+
+[tool.uv]
+package = false

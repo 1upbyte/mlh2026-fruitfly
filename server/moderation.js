@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { userKey } from '../src/moderation-rules.js';
+import { createFlyNose } from './fly.js';
 
 export function createModerationStore({ now = Date.now } = {}) {
   const sessionId = randomUUID();
@@ -53,7 +54,7 @@ export function createModerationStore({ now = Date.now } = {}) {
   return { snapshot, apply, subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); } };
 }
 
-export function moderationApi(store) {
+export function moderationApi(store, fly) {
   return async (request, response, next) => {
     const path = new URL(request.url, 'http://localhost').pathname;
     if (!path.startsWith('/api/')) return next();
@@ -78,7 +79,8 @@ export function moderationApi(store) {
       return;
     }
     const action = path.slice('/api/'.length);
-    if (!['ban', 'mute', 'timeout', 'warn', 'slow', 'mod-award', 'dismiss-award', 'reset'].includes(action)) {
+    const sniff = action === 'fly/smell' && fly;
+    if (!sniff && !['ban', 'mute', 'timeout', 'warn', 'slow', 'mod-award', 'dismiss-award', 'reset'].includes(action)) {
       return json(404, { error: 'Unknown API endpoint.' });
     }
     if (request.method !== 'POST') return json(405, { error: 'Use POST with a JSON body.' });
@@ -92,7 +94,7 @@ export function moderationApi(store) {
       }
       const text = Buffer.concat(chunks).toString('utf8');
       const body = text ? JSON.parse(text) : {};
-      return json(200, store.apply(action, body));
+      return json(200, sniff ? await fly.smell(body.words) : store.apply(action, body));
     } catch (error) {
       return json(400, { error: error instanceof SyntaxError ? 'Invalid JSON.' : error.message });
     }
@@ -101,9 +103,10 @@ export function moderationApi(store) {
 
 export function moderationPlugin() {
   const store = createModerationStore();
+  const fly = createFlyNose();
   return {
     name: 'local-moderation-api',
-    configureServer(server) { server.middlewares.use(moderationApi(store)); },
-    configurePreviewServer(server) { server.middlewares.use(moderationApi(store)); },
+    configureServer(server) { server.middlewares.use(moderationApi(store, fly)); },
+    configurePreviewServer(server) { server.middlewares.use(moderationApi(store, fly)); },
   };
 }

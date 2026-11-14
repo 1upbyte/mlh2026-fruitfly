@@ -1,6 +1,8 @@
 # Downloaded at runtime: connectome, neuron labels, text model, and the
 # GPL-3.0 profanity list (full of slurs; keep it out of the repo).
-data/
+data/*
+# ...except the fitted nose, which the trained fly needs to smell words the same way.
+!data/nose.npz
 .venv/
 __pycache__/
 *.pyc

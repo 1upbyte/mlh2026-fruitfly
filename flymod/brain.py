@@ -13,6 +13,7 @@ leaky integrate-and-fire maths and constants (Shiu et al. 2024). Changes:
 """
 from __future__ import annotations
 
+import os
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,6 +21,18 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
+
+# The simulator runs on an NVIDIA GPU when CuPy can reach one (`uv sync --extra gpu`),
+# otherwise on the CPU with NumPy. FLYMOD_CPU=1 forces the CPU.
+GPU = False
+if not os.environ.get("FLYMOD_CPU"):
+    try:
+        import cupy
+        import cupyx.scipy.sparse as cusp
+        cupy.cuda.Device(0).use()
+        GPU = True
+    except Exception:
+        pass
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
@@ -167,19 +180,23 @@ def simulate(drive: np.ndarray, W: sp.csr_matrix, ms: float = 200, seed: int = 0
     wsyn, kick, delay = 0.275, 250 * 0.275, int(1.8 / 0.1)
     f = np.float32
     B, N = drive.shape
-    rng = np.random.default_rng(seed)
+    xp = cupy if GPU else np
+    rng = xp.random.default_rng(seed)
 
     cols = np.flatnonzero(drive.any(0))                 # neurons driven in any trial
-    p = (drive[:, cols] * dt / 1000).astype(f)          # spike probability per step
-    driven = np.zeros((B, N), bool)
-    driven[:, cols] = drive[:, cols] > 0
+    p = xp.asarray(drive[:, cols] * dt / 1000, dtype=f)  # spike probability per step
+    driven = xp.zeros((B, N), bool)
+    driven[:, cols] = p > 0
+    cols = xp.asarray(cols)
 
-    v, g = np.full((B, N), v0, f), np.zeros((B, N), f)
-    last = np.full((B, N), -1e9, f)
-    counts = np.zeros((B, N), np.int32)
-    ring = np.zeros((delay, B, N), f)
+    v, g = xp.full((B, N), v0, f), xp.zeros((B, N), f)
+    last = xp.full((B, N), -1e9, f)
+    counts = xp.zeros((B, N), np.int32)
+    ring = xp.zeros((delay, B, N), f)
     decay = f(np.exp(-dt / ts))
     Ws = (W * wsyn).tocsr().astype(f)
+    if GPU:
+        Wt = cusp.csr_matrix(Ws.T.tocsr())              # input to each neuron = Wt @ spikes
 
     for k in range(int(ms / dt)):
         t, slot = f(k * dt), k % delay
@@ -187,11 +204,14 @@ def simulate(drive: np.ndarray, W: sp.csr_matrix, ms: float = 200, seed: int = 0
         ring[slot] = 0
         free = ((t - last) > ref) | driven
         v += free * (dt * (v0 - v + g) / tm)
-        g *= np.where(free, decay, f(1))
+        g *= xp.where(free, decay, f(1))
         v[:, cols] += kick * (rng.random(p.shape, dtype=f) < p)
         s = v > vth
         if s.any():
             v[s], g[s], last[s] = v0, 0, t
             counts += s
-            ring[slot] += (sp.csr_matrix(s, dtype=f) @ Ws).toarray()
-    return counts
+            if GPU:
+                ring[slot] += (Wt @ xp.ascontiguousarray(s.T, dtype=f)).T
+            else:
+                ring[slot] += (sp.csr_matrix(s, dtype=f) @ Ws).toarray()
+    return counts.get() if GPU else counts

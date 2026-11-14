@@ -21,8 +21,9 @@ PROFANE_URL = "https://raw.githubusercontent.com/awdev1/better-profane-words/mai
 INTENSITY_TO_SMELL = {1: 5.0, 2: 6.0, 3: 7.0, 4: 8.0, 5: 9.5}
 GOOD_SMELL, NEUTRAL_SMELL = 1.0, 3.0
 
-# What goes into the 100-word training dictionary: smell index -> how many words.
-DICTIONARY_MIX = {1.0: 20, 3.0: 20, 5.0: 12, 6.0: 12, 7.0: 12, 8.0: 12, 9.5: 12}
+# What goes into the training dictionary: smell index -> how many words. The rest
+# of each level is held out for evaluate.py (level 8 is small: 46 words in all).
+DICTIONARY_MIX = {1.0: 190, 3.0: 560, 5.0: 300, 6.0: 160, 7.0: 300, 8.0: 32, 9.5: 300}
 
 TOKEN = re.compile(r"[a-z0-9']+")
 
@@ -54,7 +55,7 @@ def load_vocabulary() -> dict[str, float]:
 
 
 def split_dictionary(vocab: dict[str, float], seed: int = 0) -> tuple[list[str], list[str]]:
-    """Pick the 100-word training dictionary; everything else is held out."""
+    """Pick the training dictionary; everything else is held out."""
     rng = np.random.default_rng(seed)
     train: list[str] = []
     for smell, n in DICTIONARY_MIX.items():

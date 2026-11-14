@@ -15,6 +15,9 @@ STINKS_FROM = PUNISHMENTS[-1][0]
 # clipped to 1..10, so "<= 1" would almost never fire; 1.5 means "rounds to 1".
 AWARD_UP_TO = 1.5
 
+# The same numbers, as shipped to the web app (src/fly-rules.js applies them).
+THRESHOLDS = {"punishments": PUNISHMENTS, "award_up_to": AWARD_UP_TO, "neutral": NEUTRAL}
+
 CHAT_LINE = re.compile(r"^\[(?P<time>[\d:]+)\]\s+(?P<user>[^:]+):\s?(?P<text>.*)$")
 
 

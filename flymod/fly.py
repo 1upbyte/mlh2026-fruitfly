@@ -6,10 +6,12 @@ How a real fly learns smells, and what this file copies:
 * Kenyon cells excite mushroom-body output neurons (MBON). Some MBONs push the
   fly to APPROACH, others to AVOID. The balance is how the odor "feels".
 * Punishment fires PPL1 dopamine neurons; reward fires PAM dopamine neurons.
-  Dopamine arriving while a Kenyon cell is active WEAKENS that cell's synapse
-  onto the MBONs in the dopamine neuron's compartment.
-* PPL1 sits with approach MBONs, PAM with avoid MBONs. So punishment weakens
-  "approach" for that odor (it now stinks) and reward weakens "avoid".
+  Dopamine above its tonic level while a Kenyon cell is active WEAKENS that
+  cell's synapse onto the MBONs in the dopamine neuron's compartment; a dip
+  below the tonic level STRENGTHENS it.
+* PPL1 sits with approach MBONs, PAM with avoid MBONs. So punishment (PPL1 up,
+  PAM down) weakens "approach" and strengthens "avoid" for that odor: it now
+  stinks. Reward does the opposite.
 
 The only thing that changes during training is the strength of the
 KC -> MBON synapses. Everything else is the fixed connectome.
@@ -21,13 +23,16 @@ from pathlib import Path
 import numpy as np
 import scipy.sparse as sp
 
-from .brain import Brain, load_brain, simulate
+from .brain import GPU, Brain, load_brain, simulate
 from .nose import Nose
 
 NEUTRAL = 3.0        # smell index of an odor the fly has no opinion about
-V_SPAN = 0.8         # MBON balance that counts as the extreme of the scale
-DOPAMINE_HZ = 100.0  # dopamine neuron firing rate for a maximal reward/punishment
-BATCH = 16           # trials simulated side by side (measured: ~0.16 s per word; 100 is 4x slower per word)
+V_SPAN = 0.3         # MBON balance that counts as the extreme of the scale (tuned; see README)
+TONIC_HZ = 50.0      # dopamine neuron firing rate when the fly's reaction is exactly right
+LESSON = 128         # words taught between synapse updates
+MAX_STRENGTH = 2.0   # a synapse can grow to at most twice its mapped size
+# Trials simulated side by side. CPU: measured ~0.16 s per word at 16; 100 is 4x slower per word.
+BATCH = 256 if GPU else 16
 
 
 def smell_to_balance(smell: np.ndarray) -> np.ndarray:
@@ -111,21 +116,32 @@ class Fly:
         return np.concatenate(out)
 
     def pools(self, counts: np.ndarray) -> np.ndarray:
-        """Spike counts -> (trials, 2): total avoid-MBON and approach-MBON activity."""
-        mbon = counts[:, self.brain.groups["mbon"]].astype(float)
-        return np.stack([mbon @ np.clip(self.compartment, 0, None),
-                         mbon @ np.clip(-self.compartment, 0, None)], axis=1)
+        """Spike counts -> (trials, 2): synaptic drive from the Kenyon cells onto
+        the avoid MBONs and onto the approach MBONs.
+
+        The drive (Kenyon cell spikes x synapse count x learned strength) is
+        what depolarises an MBON. It is read instead of the MBON's own spike
+        count because spiking is thresholded: only about 18 of the 96 MBONs
+        fire at all and 11% of words make no approach MBON fire, which leaves
+        nothing to compare. Measured, MBON spikes follow this drive (r = 0.97).
+        """
+        g = self.brain.groups
+        synapses = sp.csr_matrix((self._syn_weight * self.strength, (self.syn_kc, self.syn_mbon)),
+                                 shape=(len(g["kc"]), len(g["mbon"])))
+        drive = counts[:, g["kc"]].astype(np.float32) @ synapses
+        return np.stack([drive @ np.clip(self.compartment, 0, None),
+                         drive @ np.clip(-self.compartment, 0, None)], axis=1)
 
     def calibrate(self, words: list[str]) -> None:
-        """Record how active each MBON pool is before learning, so that an
-        untrained fly is indifferent (smell index 3) to everything."""
+        """Record how strongly each MBON pool is driven before learning, so that
+        an untrained fly is on average indifferent (smell index 3)."""
         self.naive = self.pools(self.sniff(words)).mean(0)
         if (self.naive <= 0).any():
-            raise RuntimeError(f"an MBON pool is silent for these odors (avoid, approach = "
+            raise RuntimeError(f"an MBON pool gets no drive for these odors (avoid, approach = "
                                f"{self.naive}); raise ODOR_HZ in nose.py or the sniff duration")
 
     def balance(self, counts: np.ndarray) -> np.ndarray:
-        """-1 (pure approach) .. +1 (pure avoid); 0 if the MBONs stay silent."""
+        """-1 (pure approach) .. +1 (pure avoid); 0 if the Kenyon cells stay silent."""
         if self.naive is None:
             raise RuntimeError("calibrate() or load() the fly first")
         avoid, approach = (self.pools(counts) / self.naive).T
@@ -136,16 +152,18 @@ class Fly:
         return balance_to_smell(self.balance(self.sniff(words, seed=seed)))
 
     # ----------------------------------------------------------------- learning
-    def learn(self, dictionary: dict[str, float], epochs: int = 20, lr: float = 0.002,
-              recovery: float = 0.0005, log=print) -> list[float]:
+    def learn(self, dictionary: dict[str, float], epochs: int = 12, lr: float = 1.0,
+              recovery: float = 0.0, log=print, first_epoch: int = 0) -> list[float]:
         """Teach the fly a {word: smell index} dictionary.
 
-        Each epoch every word is presented twice:
+        Words are taught in shuffled lessons of LESSON words; the synapses
+        change after each lesson. Within a lesson every word is presented twice:
           1. alone, and the fly's reaction is read off its MBONs;
-          2. again, with dopamine in proportion to how wrong that reaction was.
-             Under-reacted to a foul word -> punishment (PPL1).
-             Over-reacted to a fine word  -> reward (PAM).
-        Returns the mean absolute smell error after each epoch's first sniff.
+          2. again, with the dopamine neurons shifted away from their tonic
+             rate in proportion to how wrong that reaction was.
+             Under-reacted to a foul word -> punishment: PPL1 up, PAM down.
+             Over-reacted to a fine word  -> reward:     PAM up, PPL1 down.
+        Returns each epoch's mean absolute smell error on those first sniffs.
         """
         words = list(dictionary)
         target = smell_to_balance(np.array([dictionary[w] for w in words]))
@@ -155,37 +173,45 @@ class Fly:
         self.dictionary = words
 
         history = []
-        for epoch in range(epochs):
-            reaction = self.balance(self.sniff(words, seed=1000 * epoch))
-            error = target - reaction
-            mae = float(np.abs(balance_to_smell(reaction) - target_smell).mean())
-            history.append(mae)
-            log(f"epoch {epoch + 1:3d}/{epochs}  dictionary smell error {mae:.2f}  "
+        for epoch in range(first_epoch, first_epoch + epochs):
+            order = np.random.default_rng(epoch).permutation(len(words))
+            errors = []
+            for n, start in enumerate(range(0, len(words), LESSON)):
+                pick = order[start:start + LESSON]
+                lesson = [words[i] for i in pick]
+                seed = 1000 * epoch + 2 * n
+                reaction = self.balance(self.sniff(lesson, seed=seed))
+                error = np.clip(target[pick] - reaction, -1, 1)
+                errors.append(np.abs(balance_to_smell(reaction) - target_smell[pick]))
+                counts = self.sniff(lesson, reward=TONIC_HZ * (1 - error), punish=TONIC_HZ * (1 + error),
+                                    seed=seed + 1)
+                self.reinforce(counts, lr, recovery)
+            history.append(float(np.concatenate(errors).mean()))
+            log(f"epoch {epoch + 1:3d}/{first_epoch + epochs}  dictionary smell error {history[-1]:.2f}  "
                 f"mean synapse strength {self.strength.mean():.3f}")
-
-            counts = self.sniff(words,
-                                reward=DOPAMINE_HZ * np.clip(-error, 0, 1),
-                                punish=DOPAMINE_HZ * np.clip(error, 0, 1),
-                                seed=1000 * epoch + 500)
-            self.reinforce(counts, lr, recovery)
         return history
 
-    def reinforce(self, counts: np.ndarray, lr: float, recovery: float) -> None:
+    def reinforce(self, counts: np.ndarray, lr: float, recovery: float, ms: float = 200) -> None:
         """The three-factor rule, applied to every KC -> MBON synapse:
 
-            change = recovery * KC * (1 - strength)   # KC active alone: drift back up
-                     - lr * KC * dopamine             # KC active with dopamine: weaken
+            change = - lr * KC * (dopamine - tonic)        # more dopamine than usual: weaken;
+                                                           # less than usual: strengthen
+                     + recovery * KC * (1 - strength)      # optional drift back to the connectome
 
-        ``KC`` is the Kenyon cell's spike count in a trial and ``dopamine`` is the
-        spike count of the dopamine neurons that reach the synapse's MBON.
+        ``KC`` is the Kenyon cell's share of all Kenyon cell spikes in a trial
+        (so loud and faint odors teach equally fast), ``dopamine`` the
+        spike count of the dopamine neurons that reach the synapse's MBON and
+        ``tonic`` what that count is when the fly has nothing to learn.
         """
         g = self.brain.groups
         kc = counts[:, g["kc"]].astype(np.float32)                              # trials x KC
+        kc /= np.maximum(kc.sum(1, keepdims=True), 1)
         dopamine = counts[:, self._dan].astype(np.float32) @ self._dopamine_reach  # trials x MBON
-        paired = (kc.T @ dopamine)[self.syn_kc, self.syn_mbon]
+        surprise = dopamine - TONIC_HZ * ms / 1000 * self._dopamine_reach.sum(0)
+        paired = (kc.T @ surprise)[self.syn_kc, self.syn_mbon]
         alone = kc.sum(0)[self.syn_kc]
         self.strength = np.clip(self.strength + recovery * alone * (1 - self.strength) - lr * paired,
-                                0, 1).astype(np.float32)
+                                0, MAX_STRENGTH).astype(np.float32)
 
     # -------------------------------------------------------------- persistence
     def save(self, path: str | Path) -> None:
