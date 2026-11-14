@@ -73,6 +73,21 @@
     .chart-key i.tick{background:#efeff1;width:3px;height:16px;border-radius:2px}
     .takeaways{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw}
     @media(max-width:700px){.how-slide{padding-top:6vh;padding-bottom:100px}.how-kicker{font-size:11px;margin-bottom:12px}.how-slide h2{font-size:9vw;margin-bottom:35px}.how-slide p{font-size:17px}.how-slide h3{font-size:23px}.word-pipeline{gap:10px;margin:55px 0 35px;padding-bottom:24px}.word-pipeline .value{font-size:9vw}.word-pipeline figcaption{font-size:11px}.pipeline-arrow{font-size:19px}.two-columns{grid-template-columns:1fr;gap:35px}.circuit-stats .value{font-size:48px}.circuit-stats small{font-size:14px}.training-run{font-size:15px}.action-table{font-size:18px}.api-steps li{font-size:17px}.fly-assignments{font-size:18px}.how-slide .small-note{font-size:13px}.deck-chrome{background:#0e0e10f2;padding:5px}.intro-active .deck-chrome{background:#9147fff2}.result-stats{grid-template-columns:1fr 1fr;gap:26px 18px}.result-stats .value{font-size:40px}.takeaways{grid-template-columns:1fr;gap:30px}.level-chart{font-size:13px}.level-chart li{grid-template-columns:7em 1fr 2em;gap:9px}}
+    .solution-slide{flex-direction:column;justify-content:center;gap:4vh;padding-top:6vh}
+    .solution-slide h2{text-align:center;font-size:clamp(42px,5.8vw,94px);line-height:1.06;letter-spacing:-.055em}
+    .solution-scene{position:relative;display:flex;align-items:center;justify-content:space-between;width:100%;height:46vh;min-height:250px}
+    .solution-fly{position:relative;width:43%;aspect-ratio:1.3;overflow:hidden;z-index:2;flex-shrink:0}
+    .solution-fly img{position:absolute;width:240%;height:auto;max-width:none;left:-25%;top:-60%}
+    .solution-mod{width:44%;height:auto;max-height:100%;object-fit:contain;position:relative;z-index:2;border:1px solid #ffffff20}
+    .solution-smell{position:absolute;inset:0;width:100%;height:100%;z-index:3;opacity:.8;pointer-events:none}
+    @media(max-width:700px){.solution-slide{gap:7vh;padding-left:5vw;padding-right:5vw}.solution-slide h2{font-size:10vw}.solution-scene{height:32vh;min-height:180px}.solution-fly{width:47%}.solution-mod{width:47%}.solution-smell{stroke-width:7}}
+    .what-points{max-width:1080px;margin:0;padding-left:1.1em;font-size:clamp(22px,2.6vw,39px);line-height:1.4;color:#adadb8}
+    .what-points li{padding-left:8px;margin:0 0 16px}
+    .what-points li::marker{color:#a970ff}
+    .what-points strong{font-weight:700;color:#efeff1}
+    .what-points .benefit{color:#bf94ff}
+    .what-points li:nth-child(4){margin-top:30px}
+    @media(max-width:700px){.what-points{font-size:21px}.what-points li{margin-bottom:17px}}
   </style>
 </head>
 <body>
@@ -92,6 +107,19 @@
       <h2 class="reveal">And we all know<br><span class="accent">Twitch mods...</span></h2>
       <figure class="reveal delay"><img src="/presentation/twitch-mod-meme.jpg" alt="The South Park gamer meme: a gamer at his computer in a cluttered room." width="1280" height="720" style="height:auto"><!-- Source: https://imgflip.com/meme/291176769/WoW-Player-South-Park --></figure>
     </section>
+    <section class="slide solution-slide" aria-label="The solution is fruit fly smell" aria-roledescription="slide" hidden>
+      <h2>The solution is<br><span class="accent">fruit fly smell</span></h2>
+      <div class="solution-scene" role="img" aria-label="A fruit fly faces the Twitch mod meme, sniffing the smell coming from the mod.">
+        <div class="solution-fly"><img src="/presentation/fruit-fly.png" alt="" width="1600" height="1076"></div>
+        <img class="solution-mod" src="/presentation/twitch-mod-meme.jpg" alt="" width="1280" height="720">
+        <svg class="solution-smell" viewBox="0 0 1200 450" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="#b4cb82" stroke-width="5" stroke-linecap="round">
+          <path d="M830 145C760 100 740 200 670 155S570 220 505 175"/>
+          <path d="M840 205C760 155 745 260 670 215S575 280 505 235"/>
+          <path d="M830 265C760 220 740 320 670 275S575 340 505 295"/>
+        </svg>
+      </div>
+      <!-- Fruit fly photo: https://www.krishnabhatlab.org/team.html (images/fruitfly.png). Mod meme: https://imgflip.com/meme/291176769/WoW-Player-South-Park. Both downloaded locally. -->
+    </section>
     <section class="slide intro-slide" aria-label="Introducing Smellcheck" aria-roledescription="slide" hidden>
       <div class="intro-copy"><p class="reveal">Introducing</p><h2 class="reveal delay">Smellcheck.</h2></div>
       <svg class="intro-fly" viewBox="0 0 500 500" aria-hidden="true">
@@ -106,21 +134,15 @@
         <g stroke="#382044" stroke-width="6" stroke-linecap="round" fill="none"><path d="m233 117-12-29-16-7m62 36 12-29 16-7"/></g>
       </svg>
     </section>
-    <section class="slide how-slide" aria-label="Why a fly brain" aria-roledescription="slide" hidden>
-      <p class="how-kicker">Why it matters</p>
-      <h2>A whole brain you can read, <span class="accent">synapse by synapse</span></h2>
-      <div class="two-columns">
-        <div>
-          <div class="circuit-stats"><div><span class="value">139,255</span><small>Neurons in the mapped fly brain</small></div><div><span class="value">54.5M</span><small>Synapses between them</small></div></div>
-          <p>The adult fruit fly brain was mapped in full in 2024, and the wiring is free to download. Smellcheck runs the 9,039 neurons that smell and learn.</p>
-          <p class="small-note">Source: FlyWire consortium, Nature, October 2024.</p>
-        </div>
-        <div>
-          <h3>Chat moderation is word lists or black boxes.</h3>
-          <p>A word list misses anything it has not seen. A large language model catches more, but nobody can say why it banned you.</p>
-          <p>A fly learns which smells to avoid from reward and punishment, in a circuit small enough to inspect. We asked whether that circuit can learn a job it never evolved for.</p>
-        </div>
-      </div>
+    <section class="slide how-slide what-slide" aria-label="What it is" aria-roledescription="slide" hidden>
+      <h2>What it is</h2>
+      <ul class="what-points">
+        <li>Turns words into smells.</li>
+        <li>A simulated fly <strong>literally smells</strong> them.</li>
+        <li>Smell ratings decide moderation.</li>
+        <li class="benefit">Better than a static word list.</li>
+        <li class="benefit">Much cheaper than a human mod.</li>
+      </ul>
     </section>
     <section class="slide demo-slide" aria-label="Demo" aria-roledescription="slide" hidden>
       <a class="demo-link reveal" href="/" target="_blank" rel="noopener" aria-label="Open the demo in a new tab">Demo<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
@@ -243,7 +265,7 @@
   </main>
   <footer class="deck-chrome">
     <span class="wordmark">SMELLCHECK</span>
-    <span class="slide-count" id="slide-count" aria-live="polite">01 / 14</span>
+    <span class="slide-count" id="slide-count" aria-live="polite">01 / 15</span>
     <nav class="navigation" aria-label="Presentation controls"><button id="previous" aria-label="Previous slide" title="Previous slide (←)" disabled><svg viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><button id="next" aria-label="Next slide" title="Next slide (→ or Space)"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button></nav>
     <button class="fullscreen" id="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
   </footer>
