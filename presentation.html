@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0e0e10">
-  <title>Smellcheck — Hackathon Presentation</title>
+  <title>Smellcheck | Hackathon presentation</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%239147ff'/%3E%3Ctext x='10' y='25' fill='white' font-size='29' font-family='Arial' font-weight='bold'%3ES%3C/text%3E%3C/svg%3E">
   <style>
     :root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif;background:#0e0e10;color:#efeff1;--purple:#a970ff}
@@ -19,11 +19,43 @@
     .intro-slide{background:#9147ff;color:white}.intro-copy{position:relative;z-index:2}.intro-copy p{font-size:clamp(17px,2vw,30px);letter-spacing:-.025em;color:#e4d5ff;margin-bottom:27px}.intro-copy h2{font-size:clamp(48px,7.3vw,124px)}.intro-copy h2 span{display:block}.intro-fly{position:absolute;right:2vw;top:50%;transform:translateY(-50%) rotate(-8deg);width:42vw;height:68vh;filter:drop-shadow(0 30px 25px #2b08634a)}
     .demo-slide{justify-content:center;text-align:center}.demo-link{font-size:clamp(95px,19vw,280px);line-height:1;font-weight:800;letter-spacing:-.08em;color:#efeff1;text-decoration:none;display:inline-flex;align-items:center;gap:3vw}.demo-link svg{height:.32em;width:.32em;stroke:#a970ff;transition:transform .2s}.demo-link:hover{color:#bf94ff}.demo-link:hover svg{transform:translate(5px,-5px)}
     .deck-chrome{position:fixed;bottom:25px;left:3vw;right:3vw;z-index:10;display:flex;align-items:center;gap:22px;pointer-events:none}.deck-chrome button{pointer-events:auto}.wordmark{font-size:11px;font-weight:700;letter-spacing:.06em;color:#85858f}.slide-count{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:#adadb8;letter-spacing:2px}.navigation{display:flex;gap:7px}.navigation button,.fullscreen{border:1px solid #ffffff20;background:#ffffff04;border-radius:5px;display:grid;place-items:center;width:35px;height:35px}.navigation button:hover:not(:disabled),.fullscreen:hover{background:#ffffff12}.deck-chrome svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.fullscreen{margin-left:4px;color:#adadb8}.intro-active .wordmark,.intro-active .slide-count{color:#e4d5ff}.intro-active .navigation button,.intro-active .fullscreen{border-color:#ffffff40;color:white}
-    .progress{position:fixed;bottom:0;left:0;height:3px;background:#a970ff;z-index:11;width:20%;transition:width .3s}.intro-active .progress{background:#e4d5ff}
+    .progress{position:fixed;bottom:0;left:0;height:3px;background:#a970ff;z-index:11;width:11.111%;transition:width .3s}.intro-active .progress{background:#e4d5ff}
     @keyframes reveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
     @media(max-width:700px){.slide{padding:8vh 7vw 15vh}h1,h2{font-size:18vw}.title-mark{right:-15vw;width:70vw;height:70vw;opacity:.22}.title-copy{align-self:center}.byline{font-size:16px;max-width:230px;line-height:1.6;margin-top:28px}.meme-slide{flex-direction:column;justify-content:center;gap:35px;align-items:flex-start}.meme-slide h2{font-size:10vw;max-width:100%}.meme-slide figure{max-width:100%;width:100%;transform:rotate(1deg)}.meme-slide img{max-height:45vh}.intro-copy h2{font-size:12.5vw}.intro-fly{width:85vw;right:-28vw;opacity:.24}.intro-copy p{font-size:20px}.deck-chrome{left:6vw;right:6vw;gap:12px;bottom:20px}.wordmark{font-size:9px}.slide-count{font-size:10px}.navigation{gap:4px}.navigation button,.fullscreen{width:30px;height:30px}.demo-link{font-size:26vw}}
     @media(prefers-reduced-motion:reduce){.slide.active .reveal{animation:none}.progress,.demo-link svg{transition:none}}
     @media print{body{overflow:visible;background:white}.deck{height:auto}.slide,.slide[hidden]{display:flex!important;position:relative;height:100vh;break-after:page;print-color-adjust:exact;-webkit-print-color-adjust:exact}.deck-chrome,.progress{display:none}.slide .reveal{animation:none!important}}
+    .how-slide{display:block;padding-top:8vh;overflow-y:auto;padding-bottom:100px}
+    .how-kicker{font-size:13px;color:#adadb8;margin-bottom:18px}
+    .how-slide h2{font-size:clamp(36px,4.8vw,76px);line-height:1.08;letter-spacing:-.045em;margin-bottom:6vh}
+    .how-slide p{font-size:clamp(16px,1.65vw,25px);line-height:1.5;color:#adadb8}
+    .how-slide h3{font-size:clamp(21px,2.4vw,35px);line-height:1.2;letter-spacing:-.025em;margin:0 0 16px}
+    .how-slide code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.8em;color:#d2b5ff}
+    .word-pipeline{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin:9vh 0 7vh;padding-bottom:32px;border-bottom:1px solid #ffffff25}
+    .word-pipeline figure{margin:0;min-width:0}
+    .word-pipeline .value{display:block;font-size:clamp(38px,6.8vw,106px);font-weight:700;letter-spacing:-.06em;line-height:1.1}
+    .word-pipeline figcaption{font-size:clamp(13px,1.4vw,21px);color:#adadb8;margin-top:13px}
+    .pipeline-arrow{font-size:30px;color:#a970ff;align-self:center}
+    .explanation{max-width:1000px}
+    .two-columns{display:grid;grid-template-columns:1fr 1fr;gap:6vw}
+    .two-columns p+p{margin-top:20px}
+    .circuit-stats{display:flex;gap:4vw;margin-bottom:28px}
+    .circuit-stats .value{display:block;font-size:clamp(38px,5vw,76px);font-weight:700;letter-spacing:-.05em;color:#efeff1}
+    .circuit-stats small{display:block;font-size:clamp(13px,1.3vw,19px);line-height:1.5;color:#adadb8;margin-top:7px}
+    .training-run{border-top:1px solid #ffffff25;margin-top:32px;padding-top:20px;font-size:clamp(14px,1.4vw,21px);color:#bf94ff;line-height:1.5}
+    .rule{margin-bottom:30px}
+    .action-table{border-collapse:collapse;width:100%;font-size:clamp(15px,1.7vw,25px)}
+    .action-table th{text-align:left;font-weight:400;font-size:.7em;color:#adadb8;padding:0 0 14px}
+    .action-table td{padding:10px 0;border-top:1px solid #ffffff20}
+    .action-table td:first-child{color:#bf94ff;font-variant-numeric:tabular-nums;width:50%}
+    .how-slide .small-note{font-size:clamp(13px,1.2vw,18px);line-height:1.5;margin-top:25px;color:#85858f}
+    .api-steps{margin:0;padding:0 0 0 25px}
+    .api-steps li{font-size:clamp(16px,1.6vw,24px);line-height:1.5;padding-left:8px;margin-bottom:24px;color:#adadb8}
+    .api-steps li::marker{color:#a970ff}
+    .api-steps code{display:block;margin-bottom:6px}
+    .fly-assignments{margin-top:25px;border-collapse:collapse;width:100%;font-size:clamp(16px,1.7vw,25px)}
+    .fly-assignments td{padding:9px 0;border-bottom:1px solid #ffffff15}
+    .fly-assignments td:first-child{color:#bf94ff;width:36%}
+    @media(max-width:700px){.how-slide{padding-top:6vh;padding-bottom:100px}.how-kicker{font-size:11px;margin-bottom:12px}.how-slide h2{font-size:9vw;margin-bottom:35px}.how-slide p{font-size:17px}.how-slide h3{font-size:23px}.word-pipeline{gap:10px;margin:55px 0 35px;padding-bottom:24px}.word-pipeline .value{font-size:9vw}.word-pipeline figcaption{font-size:11px}.pipeline-arrow{font-size:19px}.two-columns{grid-template-columns:1fr;gap:35px}.circuit-stats .value{font-size:48px}.circuit-stats small{font-size:14px}.training-run{font-size:15px}.action-table{font-size:18px}.api-steps li{font-size:17px}.fly-assignments{font-size:18px}.how-slide .small-note{font-size:13px}.deck-chrome{background:#0e0e10f2;padding:5px}.intro-active .deck-chrome{background:#9147fff2}}
   </style>
 </head>
 <body>
@@ -31,7 +63,7 @@
     <section class="slide active" aria-label="Title" aria-roledescription="slide">
       <div class="title-copy">
         <h1 class="reveal"><span>Smell</span><span class="accent">check.</span></h1>
-        <p class="byline reveal delay">By <strong>Pablo, Saranga, Josh</strong></p>
+        <p class="byline reveal delay">By Pablo, Saranga, Josh</p>
       </div>
       <div class="title-mark" aria-hidden="true"><svg viewBox="0 0 240 280" fill="none"><path d="M30 12 10 58v170h60v40h38l40-40h50l32-36V12H30Z" stroke="currentColor" stroke-width="11"/><path d="M90 72v70m68-70v70" stroke="currentColor" stroke-width="16"/></svg></div>
     </section>
@@ -58,12 +90,73 @@
       </svg>
     </section>
     <section class="slide demo-slide" aria-label="Demo" aria-roledescription="slide" hidden>
-      <a class="demo-link reveal" href="/" target="_blank" rel="noopener" aria-label="Demo — open the live app in a new tab">Demo<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+      <a class="demo-link reveal" href="/" target="_blank" rel="noopener" aria-label="Open the demo in a new tab">Demo<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+    </section>
+    <section class="slide how-slide" aria-label="How a word becomes a smell" aria-roledescription="slide" hidden>
+      <p class="how-kicker">How it works</p>
+      <h2>How a word becomes a smell</h2>
+      <div class="word-pipeline">
+        <figure><span class="value">thanks</span><figcaption>A word from chat</figcaption></figure>
+        <span class="pipeline-arrow" aria-hidden="true">→</span>
+        <figure><span class="value">384</span><figcaption>Embedding dimensions</figcaption></figure>
+        <span class="pipeline-arrow" aria-hidden="true">→</span>
+        <figure><span class="value accent">53</span><figcaption>Receptor firing rates</figcaption></figure>
+      </div>
+      <p class="explanation">A pretrained text model embeds each word. PCA reduces the embedding to 53 features, which set the firing rates of the simulated fly's smell receptors.</p>
+      <p class="small-note">We lowercase chat, shorten repeated letters, and score each word separately.</p>
+    </section>
+    <section class="slide how-slide" aria-label="Training the smell circuit" aria-roledescription="slide" hidden>
+      <p class="how-kicker">How it works</p>
+      <h2>Training the smell circuit</h2>
+      <div class="two-columns">
+        <div>
+          <div class="circuit-stats"><div><span class="value">9,039</span><small>Simulated neurons</small></div><div><span class="value">200 ms</span><small>Brain time per word</small></div></div>
+          <p>The circuit uses wiring adapted from the fly connectome.</p>
+          <p>We compare activity feeding the approach and avoidance outputs to calculate a smell score from 1 to 10.</p>
+        </div>
+        <div>
+          <h3>Reward and punishment change the response.</h3>
+          <p>During training, dopamine signals adjust the active connections between Kenyon cells and output neurons.</p>
+          <p>Only those 62,261 synapses learn. The rest of the adapted circuit stays fixed.</p>
+          <div class="training-run">Training run: 1,842 labeled words, 12 epochs.</div>
+        </div>
+      </div>
+    </section>
+    <section class="slide how-slide" aria-label="Choosing a moderation action" aria-roledescription="slide" hidden>
+      <p class="how-kicker">How it works</p>
+      <h2>The worst word decides</h2>
+      <div class="two-columns">
+        <div>
+          <div class="rule"><h3>If a word scores 4.5 or above, use the highest score.</h3><p>Otherwise, use the average word score.</p></div>
+          <p>1 means pleasant. 10 means foul. We check the action thresholds from highest to lowest.</p>
+          <p class="small-note">Unavailable word scores default to 3. The model does not read sentence context.</p>
+        </div>
+        <table class="action-table"><thead><tr><th>Score</th><th>Action</th></tr></thead><tbody>
+          <tr><td>≥ 8.75</td><td>Ban</td></tr><tr><td>≥ 7.5</td><td>Mute</td></tr><tr><td>≥ 6.5</td><td>Timeout 30s</td></tr><tr><td>≥ 5.5</td><td>Slow 30s</td></tr><tr><td>≥ 4.5</td><td>Warn</td></tr><tr><td>1.5 &lt; score &lt; 4.5</td><td>No action</td></tr><tr><td>≤ 1.5</td><td>Mod Award</td></tr>
+        </tbody></table>
+      </div>
+    </section>
+    <section class="slide how-slide" aria-label="Applying the verdict to chat" aria-roledescription="slide" hidden>
+      <p class="how-kicker">How it works</p>
+      <h2>Applying the verdict to chat</h2>
+      <div class="two-columns">
+        <ol class="api-steps">
+          <li><code>POST /api/fly/smell</code>The server returns cached word scores or asks the trained Python model.</li>
+          <li>The browser calculates the message score and sends its action to the moderation API when the message appears.</li>
+          <li>The server pushes state updates to open tabs. Ban, mute, and timeout hide the user's messages in chat and on fly monitors. Mod Awards pause playback.</li>
+        </ol>
+        <div>
+          <h3>The flies divide the chat.</h3>
+          <p>Each displayed fly gets every Nth message. With three flies:</p>
+          <table class="fly-assignments" aria-label="Message assignments for three flies"><tbody><tr><td>Fly 1</td><td>1, 4, 7...</td></tr><tr><td>Fly 2</td><td>2, 5, 8...</td></tr><tr><td>Fly 3</td><td>3, 6, 9...</td></tr></tbody></table>
+          <p class="small-note">All displayed flies share one trained model. The video clock controls when chat messages appear.</p>
+        </div>
+      </div>
     </section>
   </main>
   <footer class="deck-chrome">
     <span class="wordmark">SMELLCHECK</span>
-    <span class="slide-count" id="slide-count" aria-live="polite">01 / 05</span>
+    <span class="slide-count" id="slide-count" aria-live="polite">01 / 09</span>
     <nav class="navigation" aria-label="Presentation controls"><button id="previous" aria-label="Previous slide" title="Previous slide (←)" disabled><svg viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><button id="next" aria-label="Next slide" title="Next slide (→ or Space)"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button></nav>
     <button class="fullscreen" id="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
   </footer>

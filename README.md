@@ -103,7 +103,7 @@ about 8% of Kenyon cells per word and distinct patterns for different words:
 
 Run `npm install`, then `npm run dev`. Open the local URL printed by Vite.
 
-The hackathon presentation is at `/presentation.html` (normally `http://127.0.0.1:5173/presentation.html`). Use arrow keys or Space to advance, F for fullscreen, and Home/End for the first/last slide. The Demo link opens the app in a new tab. The five slides cover the title and team, the Twitch users GIF, the Twitch mod meme, the introduction to Smellcheck, and the demo. The GIF and meme image are bundled locally; [image source](https://imgflip.com/meme/291176769/WoW-Player-South-Park).
+The hackathon presentation is at `/presentation.html` (normally `http://127.0.0.1:5173/presentation.html`). Use arrow keys or Space to advance, F for fullscreen, and Home/End for the first/last slide. The Demo link opens the app in a new tab. The nine slides cover the title and team, the Twitch users GIF, the Twitch mod meme, the introduction to Smellcheck, the demo, and four implementation walkthroughs: word-to-odor encoding, the learning circuit, moderation thresholds, and the live chat pipeline. The GIF and meme image are bundled locally; [image source](https://imgflip.com/meme/291176769/WoW-Player-South-Park).
 
 `npm run build` produces the frontend in `dist`, including the example video and chat. `npm run preview` serves that build with the local moderation API. Use `npm run dev` or `npm run preview` for moderation; a plain static file server does not provide the API.
 
