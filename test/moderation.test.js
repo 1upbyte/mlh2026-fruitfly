@@ -54,14 +54,30 @@ test('awards retain exact text; stale dismissal cannot clear a newer award', () 
   const first = store.apply('mod-award', { username: 'Alice', message: '<b>hello</b>', messageId: 0 }).award;
   assert.equal(first.message, '<b>hello</b>');
   assert.equal(first.messageId, 0);
-  now = 5000;
+  now = 3000;
   assert.equal(store.apply('mod-award', { username: 'Bob', message: 'next' }).award.id, first.id);
   store.apply('dismiss-award', { awardId: first.id });
+  now = 5000;
   const second = store.apply('mod-award', { username: 'Bob', message: 'next' }).award;
   store.apply('dismiss-award', { awardId: first.id });
   assert.equal(store.snapshot().award.id, second.id);
   store.apply('dismiss-award', { awardId: second.id });
   assert.equal(store.snapshot().award, null);
+});
+
+test('award banners expire after four seconds without blocking future awards', () => {
+  let now = 100;
+  const store = createModerationStore({ now: () => now });
+  const body = { username: 'Alice', message: 'hello', playbackTime: 3 };
+  const first = store.apply('mod-award', body).award;
+  assert.equal(first.expiresAt, 4100);
+  now = 4099;
+  assert.equal(store.snapshot().award.id, first.id);
+  now = 4100;
+  assert.equal(store.snapshot().award, null);
+  assert.equal(store.apply('mod-award', body).award, null);
+  now = 5100;
+  assert.notEqual(store.apply('mod-award', body).award.id, first.id);
 });
 
 test('awards are ignored before video time 2 and for 5 real seconds after an accepted award', () => {

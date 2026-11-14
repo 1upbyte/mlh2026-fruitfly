@@ -12,9 +12,10 @@ export function createModerationStore({ now = Date.now } = {}) {
   let playbackTime = 0;
   let lastAwardAt = null;
   const listeners = new Set();
+  const activeAward = () => award && now() < award.expiresAt ? award : null;
 
   function snapshot() {
-    return { sessionId, revision, users: [...users.values()].map(user => ({ ...user })), slowSeconds, award, lastAction, playbackTime, awardCooldownUntil: lastAwardAt === null ? 0 : lastAwardAt + 5000 };
+    return { sessionId, revision, users: [...users.values()].map(user => ({ ...user })), slowSeconds, award: activeAward(), lastAction, playbackTime, awardCooldownUntil: lastAwardAt === null ? 0 : lastAwardAt + 5000 };
   }
 
   function apply(action, body = {}) {
@@ -38,7 +39,7 @@ export function createModerationStore({ now = Date.now } = {}) {
     if (action === 'mod-award') {
       if (body.playbackTime !== undefined && (typeof body.playbackTime !== 'number' || !Number.isFinite(body.playbackTime) || body.playbackTime < 0)) throw new Error('playbackTime must be a nonnegative number.');
       const time = body.playbackTime ?? playbackTime;
-      if (time < 2 || award || (lastAwardAt !== null && now() - lastAwardAt < 5000)) return snapshot();
+      if (time < 2 || activeAward() || (lastAwardAt !== null && now() - lastAwardAt < 5000)) return snapshot();
     }
     if (action === 'dismiss-award' && (!award || body.awardId !== award.id)) return snapshot();
 
@@ -53,7 +54,7 @@ export function createModerationStore({ now = Date.now } = {}) {
     if (action === 'slow') slowSeconds = body.enabled === false ? 0 : 30;
     if (action === 'mod-award') {
       lastAwardAt = now();
-      award = { id: randomUUID(), username, message: body.message, messageId: body.messageId ?? null, issuedAt: lastAwardAt };
+      award = { id: randomUUID(), username, message: body.message, messageId: body.messageId ?? null, issuedAt: lastAwardAt, expiresAt: lastAwardAt + 4000 };
     }
     if (action === 'dismiss-award') award = null;
     if (action === 'reset') { users = new Map(); slowSeconds = 0; award = null; lastAwardAt = null; }

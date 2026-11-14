@@ -1,6 +1,6 @@
 import { moderatedMessages, userKey } from './moderation-rules.js';
 
-export function createModeration({ onChange, pause, resume, refreshIcons, playbackTime }) {
+export function createModeration({ onChange, refreshIcons, playbackTime }) {
   const $ = id => document.getElementById(id);
   let state = { revision: 0, users: [], slowSeconds: 0, award: null, lastAction: null };
   let selected = null;
@@ -9,6 +9,7 @@ export function createModeration({ onChange, pause, resume, refreshIcons, playba
   let shownAward = null;
   let lastTimeouts = '';
   let lastActionId = null;
+  let awardTimer;
 
   function userState(username) { return state.users.find(user => userKey(user.username) === userKey(username)); }
 
@@ -22,7 +23,6 @@ export function createModeration({ onChange, pause, resume, refreshIcons, playba
     }
     $('mod-slow').setAttribute('aria-pressed', String(state.slowSeconds > 0));
     $('mod-reset').disabled = !connected || pending;
-    $('award-resume').disabled = !connected || pending;
     $('award-dismiss').disabled = !connected || pending;
     const user = selected && userState(selected.user);
     const flags = [];
@@ -35,27 +35,26 @@ export function createModeration({ onChange, pause, resume, refreshIcons, playba
 
   function showAward(award) {
     const overlay = $('mod-award-overlay');
-    if (!award) { overlay.hidden = true; shownAward = null; return; }
-    pause();
+    if (!award || award.expiresAt <= Date.now()) { clearTimeout(awardTimer); overlay.hidden = true; shownAward = null; return; }
     if (shownAward === award.id) return;
     shownAward = award.id;
+    clearTimeout(awardTimer);
     $('award-username').textContent = award.username;
     $('award-message').textContent = award.message;
     overlay.hidden = false;
     overlay.classList.remove('celebrate');
     void overlay.offsetWidth;
     overlay.classList.add('celebrate');
-    $('award-particles').replaceChildren(...Array.from({ length: 42 }, (_, index) => {
+    $('award-message').title = award.message;
+    $('award-particles').replaceChildren(...Array.from({ length: 16 }, (_, index) => {
       const particle = document.createElement('span');
       particle.style.setProperty('--angle', `${index * 137.5}deg`);
-      particle.style.setProperty('--distance', `${110 + index % 7 * 32}px`);
+      particle.style.setProperty('--distance', `${30 + index % 5 * 12}px`);
       particle.style.setProperty('--delay', `${index % 6 * 35}ms`);
       particle.style.setProperty('--color', ['#ffdb7a', '#bf94ff', '#fff3d0', '#f8acff'][index % 4]);
       return particle;
     }));
-    $('award-resume').focus({ preventScroll: true });
-    const rect=$('player').getBoundingClientRect();
-    if(rect.bottom<50||rect.top>innerHeight) $('player').scrollIntoView({behavior:'smooth',block:'center'});
+    awardTimer = setTimeout(() => { overlay.hidden = true; shownAward = null; }, award.expiresAt - Date.now());
   }
 
   function accept(next) {
@@ -104,16 +103,12 @@ export function createModeration({ onChange, pause, resume, refreshIcons, playba
     };
   }
   $('mod-reset').onclick = () => action('reset');
-  async function dismiss(shouldResume) {
+  async function dismiss() {
     if (!state.award) return;
-    if (await action('dismiss-award', { awardId: state.award.id })) {
-      if (shouldResume) await resume();
-      else if (selected) document.querySelector(`.chat-message[data-index="${selected.index}"]`)?.focus({ preventScroll: true });
-    }
+    await action('dismiss-award', { awardId: state.award.id });
   }
-  $('award-resume').onclick = () => dismiss(true);
-  $('award-dismiss').onclick = () => dismiss(false);
-  $('mod-award-overlay').addEventListener('keydown', event => { if (event.key === 'Escape') dismiss(false); });
+  $('award-dismiss').onclick = dismiss;
+  $('mod-award-overlay').addEventListener('keydown', event => { if (event.key === 'Escape') dismiss(); });
 
   const events = new EventSource('/api/events');
   events.onmessage = event => {
@@ -136,7 +131,6 @@ export function createModeration({ onChange, pause, resume, refreshIcons, playba
     get selectedIndex() { return selected?.index; },
     user: userState,
     get revision() { return state.revision; },
-    get awardActive() { return !!state.award; },
-    dismissAndResume: () => dismiss(true),
+    get awardActive() { return !!state.award && state.award.expiresAt > Date.now(); },
   };
 }

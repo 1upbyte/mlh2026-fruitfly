@@ -34,7 +34,7 @@ export function createFlyMod({ onChange, flyFor, awardActive, playbackTime }) {
   // Sniff every word of these messages, then attach a verdict to each message.
   async function load(messages) {
     const session = generation;
-    const words = [...new Set(messages.flatMap(message => tokenize(message.text)))].filter(word => !smells.has(word));
+    const words = [...new Set(messages.filter(message => !message.demo).flatMap(message => tokenize(message.text)))].filter(word => !smells.has(word));
     for (let start = 0; start < words.length; start += 100) {
       try {
         const response = await fetch('/api/fly/smell', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ words: words.slice(start, start + 100) }) });
@@ -94,6 +94,7 @@ export function createFlyMod({ onChange, flyFor, awardActive, playbackTime }) {
     get notices() { return notices; },
     clear() { generation++; notices.length = 0; },
     describe(message) {
+      if (message?.demo) return `Injected demo message: scripted ${message.verdict.label.toLowerCase()}`;
       const verdict = message?.verdict;
       return verdict ? `Fly smells ${verdict.stink.toFixed(1)}${verdict.worst ? ` (worst word “${verdict.worst}”)` : ''} → ${verdict.label || 'no action'}` : '';
     },

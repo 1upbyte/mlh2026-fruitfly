@@ -177,7 +177,7 @@ Word smells for the example chat ship in `xqc1.fly.json`. Any other word (a type
 
 Ban and mute hide all past and future messages for that username in chat and on the flies' monitors. Timeout does the same for 30 seconds of real time, including while playback is paused. Usernames match without regard to case. Warn is a no-op: it changes no state, displays no notice, and hides no messages. Slow 30s toggles a global per-user cooldown, measured using message timestamps, keeping at most one message per user in each 30-second interval. Message indices remain unchanged, so moderation preserves fly assignments.
 
-Mod Awards are ignored before video time 0:02 and for five real seconds after the last accepted award. Ignored awards create no notice or animation. An accepted Mod Award pauses video and chat and presents the selected username and message over the room, with a trophy, rays, and confetti. Resume stream dismisses the award and continues playback; the close button dismisses it while leaving playback paused. Reset clears moderation, active awards, and the award cooldown. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
+Mod Awards are ignored before video time 0:02 and for five real seconds after the last accepted award. Ignored awards create no notice or animation. An accepted Mod Award shows the username and message in a compact banner above the room. Playback and chat continue. The banner disappears after four seconds or can be closed manually. Reset clears moderation, active awards, and the award cooldown. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
 
 ## Local API
 
@@ -191,7 +191,7 @@ All endpoints are unauthenticated, with CORS enabled for this local demo. The ba
 | `POST /api/warn` | `{"username":"example"}` | No effect. |
 | `POST /api/slow` | `{"enabled":true}` | Enable the 30-second per-user cooldown; `false` disables it. |
 | `POST /api/mod-award` | `{"username":"example","message":"Great message","messageId":0}` | Show an award if video time is at least 2 seconds and the 5-second cooldown has elapsed. `messageId` and `playbackTime` are optional. |
-| `POST /api/dismiss-award` | `{"awardId":"id from state.award.id"}` | Dismiss that award; players remain paused. |
+| `POST /api/dismiss-award` | `{"awardId":"id from state.award.id"}` | Dismiss that award without changing playback. |
 | `POST /api/reset` | `{}` | Clear moderation and awards. |
 | `POST /api/fly/smell` | `{"words":["gg","lol"]}` | Smell of each word after the harness, plus the action thresholds. `null` for a word nobody could sniff. |
 | `POST /api/playback` | `{"time":2.5}` | Update the video time used by API award checks. The browser sends this automatically. |
@@ -211,3 +211,7 @@ curl -X POST http://127.0.0.1:5173/api/mod-award \
 ```
 
 Run `npm test` for moderation behavior and HTTP/SSE integration checks.
+
+### Injected demo messages
+
+The viewer inserts one scripted message after every 10–20 original chat messages, alternating ban and timeout outcomes. These use unique `demo_` usernames and preassigned demo verdicts, then go through the normal moderation API and filtering. They are excluded from model scoring; their hover text identifies them as injected fixtures. The original log files are unchanged. Turning Fly mod off also disables actions on these fixtures.
