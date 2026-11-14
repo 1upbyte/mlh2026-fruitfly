@@ -1,5 +1,5 @@
-[!CAUTION]
-The training set for this fly mod contains a list of frowned upon words and slurs. You are warned.
+> [!CAUTION]
+> The training set for this fly mod contains a list of frowned upon words and slurs. You are warned.
 
 # Fly Mod
 
