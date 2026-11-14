@@ -4,7 +4,7 @@ import { judge, tokenize } from './fly-rules.js';
 // smells, turns that into a verdict per message, applies the verdict's action
 // through the moderation API the moment the message appears, and announces it
 // in chat the way a viewer would see it.
-export function createFlyMod({ onChange, flyFor, awardActive }) {
+export function createFlyMod({ onChange, flyFor, awardActive, playbackTime }) {
   const $ = id => document.getElementById(id);
   const smells = new Map();
   const acted = new WeakSet();
@@ -18,7 +18,7 @@ export function createFlyMod({ onChange, flyFor, awardActive }) {
     if (note !== undefined) $('fly-note').textContent = note;
   }
 
-  // What everyone in chat is told. A warning is private, so only you see yours.
+  // What everyone in chat is told after an accepted action.
   function notice(action, user) {
     const you = user === 'you';
     const who = you ? 'You have' : `${user} has`;
@@ -26,7 +26,6 @@ export function createFlyMod({ onChange, flyFor, awardActive }) {
       ban: `${who} been banned from this chat.`,
       mute: `${who} been muted.`,
       timeout: `${who} been timed out for 30 seconds.`,
-      warn: you ? 'A moderator warned you about your message.' : '',
       slow: 'This room is now in slow mode: one message every 30 seconds.',
       'mod-award': `${you ? 'You' : user} received a Mod Award!`,
     }[action];
@@ -61,13 +60,17 @@ export function createFlyMod({ onChange, flyFor, awardActive }) {
   function act(message) {
     const session = generation;
     const { action } = message.verdict;
+    if (action === 'warn' || (action === 'mod-award' && playbackTime() < 2)) return;
     queue = queue.then(async () => {
       if (session !== generation) return;
-      if (action === 'mod-award' && awardActive()) return;   // one celebration at a time
-      const body = action === 'slow' ? { enabled: true } : { username: message.user, ...(action === 'mod-award' ? { message: message.text, messageId: message.index } : {}) };
+      if (action === 'mod-award' && (awardActive() || playbackTime() < 2)) return;
+      const body = action === 'slow' ? { enabled: true } : { username: message.user, ...(action === 'mod-award' ? { message: message.text, messageId: message.index, playbackTime: playbackTime() } : {}) };
       try {
         const response = await fetch(`/api/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!response.ok || session !== generation) return;
+        const result = await response.json();
+        if (session !== generation) return;
+        if (action === 'mod-award' && (!result.award || result.award.messageId !== message.index || result.award.username !== message.user)) return;
         const text = notice(action, message.user);
         if (text) notices.push({ notice: text, time: message.time, index: message.index + .5, fly: flyFor(message), manual: message.user === 'you' });
         onChange();

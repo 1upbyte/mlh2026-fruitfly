@@ -9,15 +9,17 @@ export function createModerationStore({ now = Date.now } = {}) {
   let slowSeconds = 0;
   let award = null;
   let lastAction = null;
+  let playbackTime = 0;
+  let lastAwardAt = null;
   const listeners = new Set();
 
   function snapshot() {
-    return { sessionId, revision, users: [...users.values()].map(user => ({ ...user })), slowSeconds, award, lastAction };
+    return { sessionId, revision, users: [...users.values()].map(user => ({ ...user })), slowSeconds, award, lastAction, playbackTime, awardCooldownUntil: lastAwardAt === null ? 0 : lastAwardAt + 5000 };
   }
 
   function apply(action, body = {}) {
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('Expected a JSON object.');
-    if (!['ban', 'mute', 'timeout', 'warn', 'slow', 'mod-award', 'dismiss-award', 'reset'].includes(action)) {
+    if (!['ban', 'mute', 'timeout', 'warn', 'slow', 'mod-award', 'dismiss-award', 'reset', 'playback'].includes(action)) {
       throw new Error('Unknown action.');
     }
     const needsUser = ['ban', 'mute', 'timeout', 'warn', 'mod-award'].includes(action);
@@ -27,23 +29,34 @@ export function createModerationStore({ now = Date.now } = {}) {
       throw new Error('Provide the message text (1–8000 characters).');
     }
     if (action === 'slow' && body.enabled !== undefined && typeof body.enabled !== 'boolean') throw new Error('enabled must be true or false.');
+    if (action === 'playback') {
+      if (typeof body.time !== 'number' || !Number.isFinite(body.time) || body.time < 0) throw new Error('time must be a nonnegative number.');
+      playbackTime = body.time;
+      return snapshot();
+    }
+    if (action === 'warn') return snapshot();
+    if (action === 'mod-award') {
+      if (body.playbackTime !== undefined && (typeof body.playbackTime !== 'number' || !Number.isFinite(body.playbackTime) || body.playbackTime < 0)) throw new Error('playbackTime must be a nonnegative number.');
+      const time = body.playbackTime ?? playbackTime;
+      if (time < 2 || award || (lastAwardAt !== null && now() - lastAwardAt < 5000)) return snapshot();
+    }
     if (action === 'dismiss-award' && (!award || body.awardId !== award.id)) return snapshot();
 
-    if (['ban', 'mute', 'timeout', 'warn'].includes(action)) {
+    if (['ban', 'mute', 'timeout'].includes(action)) {
       const key = userKey(username);
       const user = { ...(users.get(key) || { username, banned: false, muted: false, timeoutUntil: 0, warnings: 0 }) };
       if (action === 'ban') user.banned = true;
       if (action === 'mute') user.muted = true;
       if (action === 'timeout') user.timeoutUntil = now() + 30_000;
-      if (action === 'warn') user.warnings += 1;
       users.set(key, user);
     }
     if (action === 'slow') slowSeconds = body.enabled === false ? 0 : 30;
     if (action === 'mod-award') {
-      award = { id: randomUUID(), username, message: body.message, messageId: body.messageId ?? null, issuedAt: now() };
+      lastAwardAt = now();
+      award = { id: randomUUID(), username, message: body.message, messageId: body.messageId ?? null, issuedAt: lastAwardAt };
     }
     if (action === 'dismiss-award') award = null;
-    if (action === 'reset') { users = new Map(); slowSeconds = 0; award = null; }
+    if (action === 'reset') { users = new Map(); slowSeconds = 0; award = null; lastAwardAt = null; }
     lastAction = { id: randomUUID(), action, username: needsUser ? username : null, at: now() };
     revision++;
     const state = snapshot();
@@ -80,7 +93,7 @@ export function moderationApi(store, fly) {
     }
     const action = path.slice('/api/'.length);
     const sniff = action === 'fly/smell' && fly;
-    if (!sniff && !['ban', 'mute', 'timeout', 'warn', 'slow', 'mod-award', 'dismiss-award', 'reset'].includes(action)) {
+    if (!sniff && !['ban', 'mute', 'timeout', 'warn', 'slow', 'mod-award', 'dismiss-award', 'reset', 'playback'].includes(action)) {
       return json(404, { error: 'Unknown API endpoint.' });
     }
     if (request.method !== 'POST') return json(405, { error: 'Use POST with a JSON body.' });
