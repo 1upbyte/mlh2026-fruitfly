@@ -1,3 +1,6 @@
+[!CAUTION]
+The training set for this fly mod contains a list of frowned upon words and slurs. You are warned.
+
 # Fly Mod
 
 A fruit fly's smell circuit, taken from the real connectome, moderates Twitch chat.
