@@ -19,7 +19,7 @@
     .intro-slide{background:#9147ff;color:white}.intro-copy{position:relative;z-index:2}.intro-copy p{font-size:clamp(17px,2vw,30px);letter-spacing:-.025em;color:#e4d5ff;margin-bottom:27px}.intro-copy h2{font-size:clamp(48px,7.3vw,124px)}.intro-copy h2 span{display:block}.intro-fly{position:absolute;right:2vw;top:50%;transform:translateY(-50%) rotate(-8deg);width:42vw;height:68vh;filter:drop-shadow(0 30px 25px #2b08634a)}
     .demo-slide{justify-content:center;text-align:center}.demo-link{font-size:clamp(95px,19vw,280px);line-height:1;font-weight:800;letter-spacing:-.08em;color:#efeff1;text-decoration:none;display:inline-flex;align-items:center;gap:3vw}.demo-link svg{height:.32em;width:.32em;stroke:#a970ff;transition:transform .2s}.demo-link:hover{color:#bf94ff}.demo-link:hover svg{transform:translate(5px,-5px)}
     .deck-chrome{position:fixed;bottom:25px;left:3vw;right:3vw;z-index:10;display:flex;align-items:center;gap:22px;pointer-events:none}.deck-chrome button{pointer-events:auto}.wordmark{font-size:11px;font-weight:700;letter-spacing:.06em;color:#85858f}.slide-count{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:#adadb8;letter-spacing:2px}.navigation{display:flex;gap:7px}.navigation button,.fullscreen{border:1px solid #ffffff20;background:#ffffff04;border-radius:5px;display:grid;place-items:center;width:35px;height:35px}.navigation button:hover:not(:disabled),.fullscreen:hover{background:#ffffff12}.deck-chrome svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.fullscreen{margin-left:4px;color:#adadb8}.intro-active .wordmark,.intro-active .slide-count{color:#e4d5ff}.intro-active .navigation button,.intro-active .fullscreen{border-color:#ffffff40;color:white}
-    .progress{position:fixed;bottom:0;left:0;height:3px;background:#a970ff;z-index:11;width:11.111%;transition:width .3s}.intro-active .progress{background:#e4d5ff}
+    .progress{position:fixed;bottom:0;left:0;height:3px;background:#a970ff;z-index:11;width:7.692%;transition:width .3s}.intro-active .progress{background:#e4d5ff}
     @keyframes reveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
     @media(max-width:700px){.slide{padding:8vh 7vw 15vh}h1,h2{font-size:18vw}.title-mark{right:-15vw;width:70vw;height:70vw;opacity:.22}.title-copy{align-self:center}.byline{font-size:16px;max-width:230px;line-height:1.6;margin-top:28px}.meme-slide{flex-direction:column;justify-content:center;gap:35px;align-items:flex-start}.meme-slide h2{font-size:10vw;max-width:100%}.meme-slide figure{max-width:100%;width:100%;transform:rotate(1deg)}.meme-slide img{max-height:45vh}.intro-copy h2{font-size:12.5vw}.intro-fly{width:85vw;right:-28vw;opacity:.24}.intro-copy p{font-size:20px}.deck-chrome{left:6vw;right:6vw;gap:12px;bottom:20px}.wordmark{font-size:9px}.slide-count{font-size:10px}.navigation{gap:4px}.navigation button,.fullscreen{width:30px;height:30px}.demo-link{font-size:26vw}}
     @media(prefers-reduced-motion:reduce){.slide.active .reveal{animation:none}.progress,.demo-link svg{transition:none}}
@@ -38,6 +38,7 @@
     .explanation{max-width:1000px}
     .two-columns{display:grid;grid-template-columns:1fr 1fr;gap:6vw}
     .two-columns p+p{margin-top:20px}
+    .two-columns p+h3{margin-top:28px}
     .circuit-stats{display:flex;gap:4vw;margin-bottom:28px}
     .circuit-stats .value{display:block;font-size:clamp(38px,5vw,76px);font-weight:700;letter-spacing:-.05em;color:#efeff1}
     .circuit-stats small{display:block;font-size:clamp(13px,1.3vw,19px);line-height:1.5;color:#adadb8;margin-top:7px}
@@ -55,7 +56,23 @@
     .fly-assignments{margin-top:25px;border-collapse:collapse;width:100%;font-size:clamp(16px,1.7vw,25px)}
     .fly-assignments td{padding:9px 0;border-bottom:1px solid #ffffff15}
     .fly-assignments td:first-child{color:#bf94ff;width:36%}
-    @media(max-width:700px){.how-slide{padding-top:6vh;padding-bottom:100px}.how-kicker{font-size:11px;margin-bottom:12px}.how-slide h2{font-size:9vw;margin-bottom:35px}.how-slide p{font-size:17px}.how-slide h3{font-size:23px}.word-pipeline{gap:10px;margin:55px 0 35px;padding-bottom:24px}.word-pipeline .value{font-size:9vw}.word-pipeline figcaption{font-size:11px}.pipeline-arrow{font-size:19px}.two-columns{grid-template-columns:1fr;gap:35px}.circuit-stats .value{font-size:48px}.circuit-stats small{font-size:14px}.training-run{font-size:15px}.action-table{font-size:18px}.api-steps li{font-size:17px}.fly-assignments{font-size:18px}.how-slide .small-note{font-size:13px}.deck-chrome{background:#0e0e10f2;padding:5px}.intro-active .deck-chrome{background:#9147fff2}}
+    .result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:3vw;margin-bottom:5vh;padding-bottom:4vh;border-bottom:1px solid #ffffff25}
+    .result-stats .value{font-size:clamp(34px,4.6vw,72px);white-space:nowrap}
+    .result-stats .value.accent{color:var(--purple)}
+    .level-chart{margin:6px 0 0;padding:0;list-style:none;font-size:clamp(13px,1.3vw,19px)}
+    .level-chart li{display:grid;grid-template-columns:8.5em 1fr 2.2em;align-items:center;gap:14px;padding:9px 0}
+    .level-chart .level{color:#adadb8}
+    .level-chart .track{position:relative;height:12px;background:#ffffff0d;border-radius:0 4px 4px 0}
+    .level-chart .bar{position:absolute;inset:0 auto 0 0;background:#a970ff;border-radius:0 4px 4px 0}
+    .level-chart .truth{position:absolute;top:-5px;bottom:-5px;width:3px;margin-left:-1px;background:#efeff1;border-radius:2px;box-shadow:0 0 0 2px #0e0e10}
+    .level-chart .said{color:#efeff1;font-variant-numeric:tabular-nums;text-align:right}
+    .level-chart li:hover .track{background:#ffffff1a}
+    .chart-key{display:flex;gap:22px;font-size:clamp(12px,1.1vw,16px);color:#adadb8;margin:0 0 10px}
+    .chart-key span{display:inline-flex;align-items:center;gap:8px}
+    .chart-key i{display:inline-block;background:#a970ff;width:22px;height:10px;border-radius:0 4px 4px 0}
+    .chart-key i.tick{background:#efeff1;width:3px;height:16px;border-radius:2px}
+    .takeaways{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw}
+    @media(max-width:700px){.how-slide{padding-top:6vh;padding-bottom:100px}.how-kicker{font-size:11px;margin-bottom:12px}.how-slide h2{font-size:9vw;margin-bottom:35px}.how-slide p{font-size:17px}.how-slide h3{font-size:23px}.word-pipeline{gap:10px;margin:55px 0 35px;padding-bottom:24px}.word-pipeline .value{font-size:9vw}.word-pipeline figcaption{font-size:11px}.pipeline-arrow{font-size:19px}.two-columns{grid-template-columns:1fr;gap:35px}.circuit-stats .value{font-size:48px}.circuit-stats small{font-size:14px}.training-run{font-size:15px}.action-table{font-size:18px}.api-steps li{font-size:17px}.fly-assignments{font-size:18px}.how-slide .small-note{font-size:13px}.deck-chrome{background:#0e0e10f2;padding:5px}.intro-active .deck-chrome{background:#9147fff2}.result-stats{grid-template-columns:1fr 1fr;gap:26px 18px}.result-stats .value{font-size:40px}.takeaways{grid-template-columns:1fr;gap:30px}.level-chart{font-size:13px}.level-chart li{grid-template-columns:7em 1fr 2em;gap:9px}}
   </style>
 </head>
 <body>
@@ -89,6 +106,22 @@
         <g stroke="#382044" stroke-width="6" stroke-linecap="round" fill="none"><path d="m233 117-12-29-16-7m62 36 12-29 16-7"/></g>
       </svg>
     </section>
+    <section class="slide how-slide" aria-label="Why a fly brain" aria-roledescription="slide" hidden>
+      <p class="how-kicker">Why it matters</p>
+      <h2>A whole brain you can read, <span class="accent">synapse by synapse</span></h2>
+      <div class="two-columns">
+        <div>
+          <div class="circuit-stats"><div><span class="value">139,255</span><small>Neurons in the mapped fly brain</small></div><div><span class="value">54.5M</span><small>Synapses between them</small></div></div>
+          <p>The adult fruit fly brain was mapped in full in 2024, and the wiring is free to download. Smellcheck runs the 9,039 neurons that smell and learn.</p>
+          <p class="small-note">Source: FlyWire consortium, Nature, October 2024.</p>
+        </div>
+        <div>
+          <h3>Chat moderation is word lists or black boxes.</h3>
+          <p>A word list misses anything it has not seen. A large language model catches more, but nobody can say why it banned you.</p>
+          <p>A fly learns which smells to avoid from reward and punishment, in a circuit small enough to inspect. We asked whether that circuit can learn a job it never evolved for.</p>
+        </div>
+      </div>
+    </section>
     <section class="slide demo-slide" aria-label="Demo" aria-roledescription="slide" hidden>
       <a class="demo-link reveal" href="/" target="_blank" rel="noopener" aria-label="Open the demo in a new tab">Demo<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
     </section>
@@ -103,7 +136,7 @@
         <figure><span class="value accent">53</span><figcaption>Receptor firing rates</figcaption></figure>
       </div>
       <p class="explanation">A pretrained text model embeds each word. PCA reduces the embedding to 53 features, which set the firing rates of the simulated fly's smell receptors.</p>
-      <p class="small-note">We lowercase chat, shorten repeated letters, and score each word separately.</p>
+      <p class="small-note">We lowercase chat, shorten repeated letters, and score each word separately. The 53 rates drive 2,279 receptor neurons, and about 8% of the 5,177 Kenyon cells respond to any one word.</p>
     </section>
     <section class="slide how-slide" aria-label="Training the smell circuit" aria-roledescription="slide" hidden>
       <p class="how-kicker">How it works</p>
@@ -118,7 +151,7 @@
           <h3>Reward and punishment change the response.</h3>
           <p>During training, dopamine signals adjust the active connections between Kenyon cells and output neurons.</p>
           <p>Only those 62,261 synapses learn. The rest of the adapted circuit stays fixed.</p>
-          <div class="training-run">Training run: 1,842 labeled words, 12 epochs.</div>
+          <div class="training-run">Training run: 1,842 of 3,343 labeled words, 12 epochs, about 12 minutes on one GPU. The other 1,501 words are held out for testing.</div>
         </div>
       </div>
     </section>
@@ -127,7 +160,7 @@
       <h2>The worst word decides</h2>
       <div class="two-columns">
         <div>
-          <div class="rule"><h3>If a word scores 4.5 or above, use the highest score.</h3><p>Otherwise, use the average word score.</p></div>
+          <div class="rule"><h3>If a word scores 4.5 or above, use the highest score.</h3><p>Otherwise, a word at 1.5 or below earns the message a Mod Award. Failing both, use the average word score.</p></div>
           <p>1 means pleasant. 10 means foul. We check the action thresholds from highest to lowest.</p>
           <p class="small-note">Unavailable word scores default to 3. The model does not read sentence context.</p>
         </div>
@@ -153,10 +186,58 @@
         </div>
       </div>
     </section>
+    <section class="slide how-slide" aria-label="Results on unseen words" aria-roledescription="slide" hidden>
+      <p class="how-kicker">Results</p>
+      <h2>It learned good from bad, on words it never smelled</h2>
+      <div class="circuit-stats result-stats">
+        <div><span class="value accent">71%</span><small>Good / neutral / bad accuracy on 354 held-out words</small></div>
+        <div><span class="value">33%</span><small>Same test, answering "neutral" every time</small></div>
+        <div><span class="value">48 / 50</span><small>Of its 50 best-rated words are labeled kind</small></div>
+        <div><span class="value">7 / 10</span><small>Of its 10 worst-rated words were never taught</small></div>
+      </div>
+      <p class="explanation">We had the fly rate all 3,343 labeled words. Its favorites include excellent, grateful and lovely. Encouraging, peace and happy rank near the top too, and it was never taught those. Seven of its ten worst are slurs or hate terms.</p>
+      <div class="training-run">Training: the smell error on the dictionary fell from 2.00 to 1.35 over 12 epochs.</div>
+    </section>
+    <section class="slide how-slide" aria-label="What it gets wrong" aria-roledescription="slide" hidden>
+      <p class="how-kicker">Results</p>
+      <h2>It cannot tell bad from <span class="accent">worse</span></h2>
+      <div class="two-columns">
+        <div>
+          <h3>What the fly says, by true smell</h3>
+          <p class="chart-key"><span><i></i>Fly's average answer</span><span><i class="tick"></i>True smell</span></p>
+          <ul class="level-chart" aria-label="The fly's average answer for each true smell level, on a 1 to 10 scale">
+            <li title="True smell 1 (Mod Award): the fly says 2.6 on average"><span class="level">Mod Award · 1</span><span class="track"><span class="bar" style="width:17.8%"></span><span class="truth" style="left:0.0%"></span></span><span class="said">2.6</span></li>
+            <li title="True smell 3 (No action): the fly says 3.2 on average"><span class="level">No action · 3</span><span class="track"><span class="bar" style="width:24.4%"></span><span class="truth" style="left:22.2%"></span></span><span class="said">3.2</span></li>
+            <li title="True smell 5 (Warn): the fly says 6.1 on average"><span class="level">Warn · 5</span><span class="track"><span class="bar" style="width:56.7%"></span><span class="truth" style="left:44.4%"></span></span><span class="said">6.1</span></li>
+            <li title="True smell 6 (Slow 30s): the fly says 5.6 on average"><span class="level">Slow 30s · 6</span><span class="track"><span class="bar" style="width:51.1%"></span><span class="truth" style="left:55.6%"></span></span><span class="said">5.6</span></li>
+            <li title="True smell 7 (Timeout 30s): the fly says 6.0 on average"><span class="level">Timeout 30s · 7</span><span class="track"><span class="bar" style="width:55.6%"></span><span class="truth" style="left:66.7%"></span></span><span class="said">6.0</span></li>
+            <li title="True smell 8 (Mute): the fly says 6.1 on average"><span class="level">Mute · 8</span><span class="track"><span class="bar" style="width:56.7%"></span><span class="truth" style="left:77.8%"></span></span><span class="said">6.1</span></li>
+            <li title="True smell 9.5 (Ban): the fly says 6.9 on average"><span class="level">Ban · 9.5</span><span class="track"><span class="bar" style="width:65.6%"></span><span class="truth" style="left:94.4%"></span></span><span class="said">6.9</span></li>
+          </ul>
+          <p class="small-note">354 held-out words, scale 1 to 10. Every bad word lands between 5.6 and 6.9.</p>
+        </div>
+        <div>
+          <p>On its own the fly almost never bans: it catches 11% of ban-worthy words. A plain linear model on the same 53 inputs scores 83% where the fly scores 71%.</p>
+          <h3>So the fly wears a harness.</h3>
+          <p>It stretches the fly's scale, keeps known slurs at Mute or worse, and caps words nobody has labeled at a Warn.</p>
+          <p>Left alone on 140 xQc chat messages, the fly banned "LOOOOOLLL" and gave 12 timeouts. With the harness: no bans, 3 timeouts, all for real swearing, and 4 Mod Awards. It still warns 53 times.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide how-slide" aria-label="What it means" aria-roledescription="slide" hidden>
+      <p class="how-kicker">What it means</p>
+      <h2>A mapped brain can learn a job it never evolved for</h2>
+      <div class="takeaways">
+        <div><h3>Only the fly's own learning rule was used.</h3><p>Dopamine changed 62,261 synapses. Everything else is the wiring as mapped, apart from three corrections that stop the circuit saturating.</p></div>
+        <div><h3>It learned what this circuit is for.</h3><p>Approach or avoid is what a fly's smell circuit computes, and it got that right 71% of the time on unseen words. A five-step punishment ladder is not, which is why the harness exists.</p></div>
+        <div><h3>Biology did not beat arithmetic.</h3><p>A linear model does better. The value is that a real connectome did it at all, at 0.16 seconds a word on a laptop, and that every verdict traces back to named neurons.</p></div>
+      </div>
+      <div class="training-run">Next: sentence context instead of single words, and a severity signal the fly can learn.</div>
+    </section>
   </main>
   <footer class="deck-chrome">
     <span class="wordmark">SMELLCHECK</span>
-    <span class="slide-count" id="slide-count" aria-live="polite">01 / 09</span>
+    <span class="slide-count" id="slide-count" aria-live="polite">01 / 13</span>
     <nav class="navigation" aria-label="Presentation controls"><button id="previous" aria-label="Previous slide" title="Previous slide (←)" disabled><svg viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><button id="next" aria-label="Next slide" title="Next slide (→ or Space)"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button></nav>
     <button class="fullscreen" id="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
   </footer>
