@@ -1,0 +1,6 @@
+# Downloaded at runtime: connectome, neuron labels, text model, and the
+# GPL-3.0 profanity list (full of slurs; keep it out of the repo).
+data/
+.venv/
+__pycache__/
+*.pyc
