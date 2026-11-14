@@ -34,11 +34,12 @@ test('timeout lasts 30 seconds of real time, and expiry does not override a ban 
   assert.equal(moderatedMessages(messages, store.snapshot(), 32_000).length, 1);
 });
 
-test('warning keeps messages visible and slow mode enforces a per-user 30-second playback-time interval', () => {
+test('warnings do nothing and slow mode enforces a per-user 30-second playback-time interval', () => {
   const store = createModerationStore();
+  const original = store.snapshot();
   store.apply('warn', { username: 'Alice' });
   store.apply('warn', { username: 'ALICE' });
-  assert.equal(store.snapshot().users[0].warnings, 2);
+  assert.deepEqual(store.snapshot(), original);
   assert.equal(moderatedMessages(messages, store.snapshot()).length, 4);
   store.apply('slow');
   assert.deepEqual(moderatedMessages(messages, store.snapshot()).map(m => m.index), [0, 1, 3]);
@@ -47,15 +48,49 @@ test('warning keeps messages visible and slow mode enforces a per-user 30-second
 });
 
 test('awards retain exact text; stale dismissal cannot clear a newer award', () => {
-  const store = createModerationStore();
+  let now = 0;
+  const store = createModerationStore({ now: () => now });
+  store.apply('playback', { time: 2 });
   const first = store.apply('mod-award', { username: 'Alice', message: '<b>hello</b>', messageId: 0 }).award;
   assert.equal(first.message, '<b>hello</b>');
   assert.equal(first.messageId, 0);
+  now = 5000;
+  assert.equal(store.apply('mod-award', { username: 'Bob', message: 'next' }).award.id, first.id);
+  store.apply('dismiss-award', { awardId: first.id });
   const second = store.apply('mod-award', { username: 'Bob', message: 'next' }).award;
   store.apply('dismiss-award', { awardId: first.id });
   assert.equal(store.snapshot().award.id, second.id);
   store.apply('dismiss-award', { awardId: second.id });
   assert.equal(store.snapshot().award, null);
+});
+
+test('awards are ignored before video time 2 and for 5 real seconds after an accepted award', () => {
+  let now = 100;
+  const store = createModerationStore({ now: () => now });
+  const body = { username: 'Alice', message: 'hello' };
+  for (const time of [0, 1, 1.999]) {
+    store.apply('playback', { time });
+    const before = store.snapshot();
+    assert.deepEqual(store.apply('mod-award', body), before);
+  }
+  store.apply('playback', { time: 2 });
+  const first = store.apply('mod-award', body).award;
+  assert.ok(first);
+  assert.equal(store.snapshot().awardCooldownUntil, 5100);
+  store.apply('dismiss-award', { awardId: first.id });
+  for (now of [101, 2000, 5099]) {
+    const before = store.snapshot();
+    assert.deepEqual(store.apply('mod-award', body), before);
+  }
+  now = 5100;
+  const next = store.apply('mod-award', body).award;
+  assert.ok(next);
+  assert.notEqual(next.id, first.id);
+  store.apply('dismiss-award', { awardId: next.id });
+  now = 20000;
+  store.apply('playback', { time: 0 });
+  assert.equal(store.apply('mod-award', body).award, null);
+  assert.ok(store.apply('mod-award', { ...body, playbackTime: 2.5 }).award);
 });
 
 test('invalid commands leave state unchanged', () => {

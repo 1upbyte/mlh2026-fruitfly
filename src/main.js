@@ -36,7 +36,6 @@ function renderChat(force=false){
     line.title=fly.describe(m);
     const stamp=document.createElement('span');stamp.className='timestamp';stamp.textContent=format(m.time);line.append(stamp);
     const user=document.createElement('b');user.textContent=m.user;user.style.color=userColor(m.user);line.append(user,document.createTextNode(`: ${m.text}`));
-    if(moderation.warned(m.user)){const badge=document.createElement('span');badge.className='warned-badge';badge.textContent='Warned';line.append(badge);}
     fragment.append(line);}
   const oldScroll=$('chat-messages').scrollTop;$('chat-messages').replaceChildren(fragment);$('chat-messages').scrollTop=autoScroll?$('chat-messages').scrollHeight:oldScroll;
 }
@@ -107,7 +106,11 @@ async function loadRecording(id){
   finally{$('recording').disabled=false;}
 }
 $('recording').onchange=event=>loadRecording(event.target.value);
-const moderation=createModeration({onChange:()=>renderChat(true),pause:()=>video.pause(),resume:play,refreshIcons});
-const fly=createFlyMod({onChange:()=>renderChat(true),flyFor:m=>assignedTo(m.index,count),awardActive:()=>moderation.awardActive});
+const moderation=createModeration({onChange:()=>renderChat(true),pause:()=>video.pause(),resume:play,refreshIcons,playbackTime:()=>video.currentTime});
+const fly=createFlyMod({onChange:()=>renderChat(true),flyFor:m=>assignedTo(m.index,count),awardActive:()=>moderation.awardActive,playbackTime:()=>video.currentTime});
+function syncPlayback(){
+  fetch('/api/playback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({time:video.currentTime})}).catch(()=>{});
+}
+for(const event of ['timeupdate','seeked','loadedmetadata','emptied','play','pause'])video.addEventListener(event,syncPlayback);
 await loadRecording('xqc1');
 update();

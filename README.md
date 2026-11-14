@@ -148,7 +148,7 @@ about 8% of Kenyon cells per word and distinct patterns for different words:
 ## Known limits
 
 - **It over-warns.** On `xqc1.txt` the fly warns 53 of 140 messages, mostly
-  for unlisted words such as emote names. The harness keeps those at Warn.
+  for unlisted words such as emote names. The harness keeps those at Warn, which the viewer now ignores.
 - **Severity is flat.** Held-out Ban-level words average 6.9 from the fly
   (7.2 with the curve), so bans come almost only from the harness's slur list.
 - Words only: no context, no phrases, no spacing tricks.
@@ -171,13 +171,13 @@ Files stay in the browser. The interface uses Three.js and Lucide icons.
 
 ## Moderation
 
-The page is a chat viewer's view. The trained flies moderate: each message is judged as it appears, by the fly it is assigned to, and the action is applied through the local API. Chat shows what a viewer would see ("user has been timed out for 30 seconds."); warnings are private, so you only see your own. Messages you type are judged too, and a ban, mute or timeout disables your chat box. Hover a message to see its smell. Under Session, "Fly mod on" switches the flies off and Reset lifts every punishment.
+The page is a chat viewer's view. The trained flies moderate: each message is judged as it appears, by the fly it is assigned to, and the action is applied through the local API. Chat shows what a viewer would see ("user has been timed out for 30 seconds."); warnings have no effect. Messages you type are judged too, and a ban, mute or timeout disables your chat box. Hover a message to see its smell. Under Session, "Fly mod on" switches the flies off and Reset lifts every punishment.
 
 Word smells for the example chat ship in `xqc1.fly.json`. Any other word (a typed message, an uploaded chat) is sniffed by `fly_server.py`, which the server starts on demand; if Python or `trained_fly.npz` is missing, those words count as neutral.
 
-Ban and mute hide all past and future messages for that username in chat and on the flies' monitors. Timeout does the same for 30 seconds of real time, including while playback is paused. Usernames match without regard to case. Warn adds a warning badge without hiding messages. Slow 30s toggles a global per-user cooldown, measured using message timestamps, keeping at most one message per user in each 30-second interval. Message indices remain unchanged, so moderation preserves fly assignments.
+Ban and mute hide all past and future messages for that username in chat and on the flies' monitors. Timeout does the same for 30 seconds of real time, including while playback is paused. Usernames match without regard to case. Warn is a no-op: it changes no state, displays no notice, and hides no messages. Slow 30s toggles a global per-user cooldown, measured using message timestamps, keeping at most one message per user in each 30-second interval. Message indices remain unchanged, so moderation preserves fly assignments.
 
-Mod Award pauses video and chat and presents the selected username and message over the room, with a trophy, rays, and confetti. Resume stream dismisses the award and continues playback; the close button dismisses it while leaving playback paused. Reset clears moderation and active awards. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
+Mod Awards are ignored before video time 0:02 and for five real seconds after the last accepted award. Ignored awards create no notice or animation. An accepted Mod Award pauses video and chat and presents the selected username and message over the room, with a trophy, rays, and confetti. Resume stream dismisses the award and continues playback; the close button dismisses it while leaving playback paused. Reset clears moderation, active awards, and the award cooldown. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
 
 ## Local API
 
@@ -188,12 +188,13 @@ All endpoints are unauthenticated, with CORS enabled for this local demo. The ba
 | `POST /api/ban` | `{"username":"example"}` | Hide the user's messages until reset. |
 | `POST /api/mute` | `{"username":"example"}` | Hide the user's messages until reset. |
 | `POST /api/timeout` | `{"username":"example"}` | Hide the user's messages for 30 seconds. |
-| `POST /api/warn` | `{"username":"example"}` | Increment the user's warning count. |
+| `POST /api/warn` | `{"username":"example"}` | No effect. |
 | `POST /api/slow` | `{"enabled":true}` | Enable the 30-second per-user cooldown; `false` disables it. |
-| `POST /api/mod-award` | `{"username":"example","message":"Great message","messageId":0}` | Pause connected players and show the award. `messageId` is optional. |
+| `POST /api/mod-award` | `{"username":"example","message":"Great message","messageId":0}` | Show an award if video time is at least 2 seconds and the 5-second cooldown has elapsed. `messageId` and `playbackTime` are optional. |
 | `POST /api/dismiss-award` | `{"awardId":"id from state.award.id"}` | Dismiss that award; players remain paused. |
 | `POST /api/reset` | `{}` | Clear moderation and awards. |
 | `POST /api/fly/smell` | `{"words":["gg","lol"]}` | Smell of each word after the harness, plus the action thresholds. `null` for a word nobody could sniff. |
+| `POST /api/playback` | `{"time":2.5}` | Update the video time used by API award checks. The browser sends this automatically. |
 | `GET /api/state` | — | Read the current session, users, slow mode, and active award. |
 | `GET /api/events` | — | Subscribe to server-sent state updates, including an initial snapshot. |
 

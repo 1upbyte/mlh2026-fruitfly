@@ -1,6 +1,6 @@
 import { moderatedMessages, userKey } from './moderation-rules.js';
 
-export function createModeration({ onChange, pause, resume, refreshIcons }) {
+export function createModeration({ onChange, pause, resume, refreshIcons, playbackTime }) {
   const $ = id => document.getElementById(id);
   let state = { revision: 0, users: [], slowSeconds: 0, award: null, lastAction: null };
   let selected = null;
@@ -8,6 +8,7 @@ export function createModeration({ onChange, pause, resume, refreshIcons }) {
   let pending = false;
   let shownAward = null;
   let lastTimeouts = '';
+  let lastActionId = null;
 
   function userState(username) { return state.users.find(user => userKey(user.username) === userKey(username)); }
 
@@ -28,7 +29,6 @@ export function createModeration({ onChange, pause, resume, refreshIcons }) {
     if (user?.banned) flags.push('Banned');
     if (user?.muted) flags.push('Muted');
     if (user?.timeoutUntil > Date.now()) flags.push(`Timed out · ${Math.ceil((user.timeoutUntil - Date.now()) / 1000)}s`);
-    if (user?.warnings) flags.push(`Warned${user.warnings > 1 ? ` (${user.warnings})` : ''}`);
     if (state.slowSeconds) flags.push('Slow mode · 30s');
     $('mod-user-state').textContent = flags.join(' · ');
   }
@@ -60,6 +60,14 @@ export function createModeration({ onChange, pause, resume, refreshIcons }) {
 
   function accept(next) {
     if (next.sessionId === state.sessionId && next.revision < state.revision) return;
+    const action = next.lastAction;
+    if (state.sessionId === next.sessionId && action && action.id !== lastActionId && ['ban', 'mute', 'timeout', 'slow', 'mod-award'].includes(action.action)) {
+      const chat = $('chat-messages');
+      chat.classList.remove('moderation-flash');
+      void chat.offsetWidth;
+      chat.classList.add('moderation-flash');
+    }
+    lastActionId = action?.id;
     state = next;
     showAward(state.award);
     updatePanel();
@@ -92,7 +100,7 @@ export function createModeration({ onChange, pause, resume, refreshIcons }) {
       const name = button.dataset.modAction;
       if (name === 'slow') return action(name, { enabled: !state.slowSeconds });
       if (!selected) return;
-      action(name, { username: selected.user, ...(name === 'mod-award' ? { message: selected.text, messageId: selected.index } : {}) });
+      action(name, { username: selected.user, ...(name === 'mod-award' ? { message: selected.text, messageId: selected.index, playbackTime: playbackTime() } : {}) });
     };
   }
   $('mod-reset').onclick = () => action('reset');
@@ -129,7 +137,6 @@ export function createModeration({ onChange, pause, resume, refreshIcons }) {
     user: userState,
     get revision() { return state.revision; },
     get awardActive() { return !!state.award; },
-    warned: username => !!userState(username)?.warnings,
     dismissAndResume: () => dismiss(true),
   };
 }

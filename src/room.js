@@ -151,8 +151,10 @@ export function createRoom(container, onFocus) {
       }
       item.wings.forEach((wing,i)=>{
         const side=i===0?-1:1;
-        wing.rotation.y=side*(flying?.7:.3);
-        wing.rotation.z=side*(flying?.25+Math.sin(time*.12+item.index)*.95:.25+Math.sin(phase)*.015);
+        const flap=time*(flying?.065:.028)+item.index*1.7;
+        wing.rotation.x=-.3+Math.cos(flap)*.12;
+        wing.rotation.y=side*(flying?.7:.45);
+        wing.rotation.z=side*(.25+Math.sin(flap)*(flying?.95:.45));
       });
     }
     renderer.render(scene,camera);
