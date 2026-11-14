@@ -1,7 +1,7 @@
 > [!CAUTION]
 > The training set for this fly mod contains a list of frowned upon words and slurs. You are warned.
 
-# Fly Mod
+# Smellcheck
 
 A fruit fly's smell circuit, taken from the real connectome, moderates Twitch chat.
 Each word becomes an odor. The fly is taught 1,842 words by reward and punishment,
@@ -159,7 +159,7 @@ about 8% of Kenyon cells per word and distinct patterns for different words:
 
 Run `npm install`, then `npm run dev`. Open the local URL printed by Vite.
 
-The hackathon presentation is at `/presentation.html` (normally `http://127.0.0.1:5173/presentation.html`). Use arrow keys or Space to advance, F for fullscreen, and Home/End for the first/last slide. The Demo link opens the app in a new tab. The thirteen slides cover the title and team, the Twitch users GIF, the Twitch mod meme, the introduction to Smellcheck, why a mapped fly brain matters, the demo, four implementation walkthroughs (word-to-odor encoding, the learning circuit, moderation thresholds, and the live chat pipeline), then the results on held-out words, what the fly gets wrong and why it wears a harness, and what it means. Figures on the slides come from `logs/train.log`, `logs/eval.log`, `logs/moderate.log` and `logs/all_smells.json`. The GIF and meme image are bundled locally; [image source](https://imgflip.com/meme/291176769/WoW-Player-South-Park).
+The hackathon presentation is at `/presentation.html` (normally `http://127.0.0.1:5173/presentation.html`). Use arrow keys or Space to advance, F for fullscreen, and Home/End for the first/last slide. The Demo link opens the app in a new tab. The thirteen slides cover the title and team, the Twitch users GIF, the Twitch mod meme, the introduction to Smellcheck, why a mapped fly brain matters, the demo, four implementation walkthroughs (word-to-odor encoding, the learning circuit, moderation thresholds, and the live chat pipeline), then the results on held-out words, what the fly gets wrong and why it wears a harness, and what it means. Figures on the slides come from `logs/train.log`, `logs/eval.log`, `logs/moderate.log` and `logs/all_smells.json` (the fly's rating of every labelled word, best-smelling first; slurs and other top-severity words are masked to their first letter). The GIF and meme image are bundled locally; [image source](https://imgflip.com/meme/291176769/WoW-Player-South-Park).
 
 `npm run build` produces the frontend in `dist`, including the example video and chat. `npm run preview` serves that build with the local moderation API. Use `npm run dev` or `npm run preview` for moderation; a plain static file server does not provide the API.
 
