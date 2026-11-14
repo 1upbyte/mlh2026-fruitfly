@@ -1,16 +1,18 @@
 export function injectDemoMessages(messages, random = Math.random) {
   const result = [];
-  const usernames = new Set(messages.map(message => message.user.toLowerCase()));
-  const prefix = `demo_${crypto.randomUUID().slice(0, 6)}`;
+  const usernames = [...new Map(messages.map(message => [message.user.toLowerCase(), message.user])).values()];
+  let available = [...usernames];
+  let previousUser;
   let remaining = 10 + Math.floor(random() * 11);
-  let number = 0;
   let injected = 0;
   for (const message of messages) {
     result.push({ ...message, index: result.length });
     if (--remaining > 0) continue;
-    let user;
-    do { user = `${prefix}_${++number}`; } while (usernames.has(user));
-    usernames.add(user);
+    if (!available.length) available = [...usernames];
+    let pick = Math.floor(random() * available.length);
+    if (available.length > 1 && available[pick].toLowerCase() === previousUser) pick = (pick + 1) % available.length;
+    const [user] = available.splice(pick, 1);
+    previousUser = user.toLowerCase();
     const ban = injected++ % 2 === 0;
     result.push({
       time: message.time, stamp: message.stamp, index: result.length, user,

@@ -177,7 +177,7 @@ Word smells for the example chat ship in `xqc1.fly.json`. Any other word (a type
 
 Ban and mute hide all past and future messages for that username in chat and on the flies' monitors. Timeout does the same for 30 seconds of real time, including while playback is paused. Usernames match without regard to case. Warn is a no-op: it changes no state, displays no notice, and hides no messages. Slow 30s toggles a global per-user cooldown, measured using message timestamps, keeping at most one message per user in each 30-second interval. Message indices remain unchanged, so moderation preserves fly assignments.
 
-Mod Awards are ignored before video time 0:02 and for five real seconds after the last accepted award. Ignored awards create no notice or animation. An accepted Mod Award shows the username and message in a compact banner above the room. Playback and chat continue. The banner disappears after four seconds or can be closed manually. Reset clears moderation, active awards, and the award cooldown. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
+Mod Awards are ignored before video time 0:02 and for five real seconds after the last accepted award. Ignored awards create no notice or animation. An accepted Mod Award shows the username and message in a compact banner inside the MP4 video inset. Playback and chat continue. The banner disappears after four seconds or can be closed manually. Reset clears moderation, active awards, and the award cooldown. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
 
 ## Local API
 
@@ -214,4 +214,4 @@ Run `npm test` for moderation behavior and HTTP/SSE integration checks.
 
 ### Injected demo messages
 
-The viewer inserts one scripted message after every 10–20 original chat messages, alternating ban and timeout outcomes. These use unique `demo_` usernames and preassigned demo verdicts, then go through the normal moderation API and filtering. They are excluded from model scoring; their hover text identifies them as injected fixtures. The original log files are unchanged. Turning Fly mod off also disables actions on these fixtures.
+The viewer inserts one scripted message after every 10–20 original chat messages, alternating ban and timeout outcomes. These use usernames from the loaded chat, rotating without repeats until the pool is exhausted, and preassigned demo verdicts. They go through the normal moderation API and filtering, so a ban or timeout also hides that user's original messages. They are excluded from model scoring; their hover text identifies them as injected fixtures. The original log files are unchanged. Turning Fly mod off also disables actions on these fixtures.

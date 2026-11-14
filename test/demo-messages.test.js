@@ -24,15 +24,27 @@ test('inject one demo message after 10–20 source messages, with alternating ba
   assert.equal(source.at(-1).index, 139);
 });
 
-test('injected users are separate from real chatters and messages are blocked by the existing moderation rules', () => {
+test('injected messages use varied real usernames, and moderation also removes that user’s original messages', () => {
   const messages = injectDemoMessages(source, () => 0);
-  const second = injectDemoMessages(source, () => 0);
   const fixtures = messages.filter(m => m.demo);
-  const names = new Set([...source, ...fixtures, ...second.filter(m => m.demo)].map(m => m.user.toLowerCase()));
-  assert.equal(names.size, source.length + fixtures.length * 2);
+  const realNames = new Set(source.map(m => m.user));
+  assert.ok(fixtures.every(m => realNames.has(m.user)));
+  assert.equal(new Set(fixtures.map(m => m.user)).size, fixtures.length);
   const store = createModerationStore({ now: () => 1000 });
   for (const fixture of fixtures) store.apply(fixture.verdict.action, { username: fixture.user });
-  assert.deepEqual(moderatedMessages(messages, store.snapshot(), 1000).map(m => m.text), source.map(m => m.text));
+  const blocked = new Set(fixtures.map(m => m.user));
+  const visible = moderatedMessages(messages, store.snapshot(), 1000);
+  assert.ok(visible.every(m => !blocked.has(m.user)));
+  assert.equal(visible.length, source.length - blocked.size);
+});
+
+test('username rotation avoids consecutive repeats across refills and handles a single-user chat', () => {
+  const repeated = source.map((m, i) => ({ ...m, user: i % 2 ? 'Alice' : 'Bob' }));
+  const fixtures = injectDemoMessages(repeated, () => 0).filter(m => m.demo);
+  assert.ok(fixtures.every((m, i) => i === 0 || m.user !== fixtures[i - 1].user));
+  const single = injectDemoMessages(source.map(m => ({ ...m, user: 'Alice' })), () => 0).filter(m => m.demo);
+  assert.ok(single.length > 1);
+  assert.ok(single.every(m => m.user === 'Alice'));
 });
 
 test('short logs stay unchanged and injections do not extend the recording timeline', () => {

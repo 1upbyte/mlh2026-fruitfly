@@ -23,7 +23,7 @@
 .chat-message:hover{background:#ffffff0a}
 .chat-message[aria-pressed=true]{background:#9147ff26;box-shadow:inset 2px 0 #a970ff}
 .chat-message:focus-visible{outline:1px solid #a970ff;outline-offset:1px}
-.award-overlay{position:absolute;top:52px;left:50%;transform:translateX(-50%);width:min(420px,calc(100% - 32px));z-index:8;overflow:hidden;border:1px solid #ffdb7a65;border-radius:7px;background:#231b30f2;box-shadow:0 4px 20px #0006;isolation:isolate;animation:award-enter .3s ease-out}
+.award-overlay{position:absolute;top:6px;left:26px;right:26px;width:auto;max-height:calc(100% - 12px);z-index:8;overflow:hidden;border:1px solid #ffdb7a65;border-radius:7px;background:#231b30f2;box-shadow:0 4px 20px #0006;isolation:isolate;animation:award-enter .3s ease-out}
 .award-dismiss{position:absolute;right:5px;top:5px;z-index:3;width:25px;height:25px;color:#c7bbd5}
 .award-dismiss svg{width:14px;height:14px}
 .award-card{display:grid;grid-template-columns:40px minmax(0,1fr);align-items:center;gap:12px;position:relative;z-index:2;padding:13px 35px 13px 14px}
@@ -36,9 +36,12 @@
 .award-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
 .award-particles span{position:absolute;left:50%;top:50%;width:4px;height:6px;background:var(--color);border-radius:1px;opacity:0}
 .celebrate .award-particles span{animation:award-burst 1.3s var(--delay) ease-out both}
-@keyframes award-enter{from{opacity:0;margin-top:-8px}to{opacity:1;margin-top:0}}
+@keyframes award-enter{from{opacity:0}to{opacity:1}}
 @keyframes award-burst{0%{opacity:0;transform:rotate(var(--angle)) translateY(0)}15%{opacity:.8}100%{opacity:0;transform:rotate(var(--angle)) translateY(var(--distance)) rotate(180deg)}}
-@media(max-width:720px){.chat-panel{height:640px}.award-overlay{top:46px;width:min(360px,calc(100% - 24px))}.award-card{padding:10px 30px 10px 10px;grid-template-columns:30px minmax(0,1fr);gap:9px}.award-trophy{width:30px;height:30px}.award-trophy svg{width:18px;height:18px}.award-card h3{font-size:13px}.award-card blockquote{font-size:11px}}
+@media(max-width:720px){.chat-panel{height:640px}}
+@container (max-width:420px){.award-card{padding:9px 27px 9px 9px;grid-template-columns:28px minmax(0,1fr);gap:8px}.award-trophy{width:28px;height:28px}.award-trophy svg{width:17px;height:17px}.award-card h3{font-size:12px}.award-card blockquote{font-size:11px}}
+@container (max-width:300px){.award-card{display:block;padding:7px 24px 7px 7px}.award-trophy{display:none}.award-card h2{font-size:7px;letter-spacing:.5px;margin-bottom:3px}.award-card h3{font-size:10px;margin-bottom:3px}.award-card blockquote{font-size:9px;-webkit-line-clamp:1;max-height:1.4em}.award-dismiss{width:20px;height:20px;right:2px;top:2px}}
+
 @media(prefers-reduced-motion:reduce){.award-overlay,.celebrate .award-particles span{animation:none}}
 .chat-notice{color:#ffc3c1;background:#ff82801c;border-left:2px solid #ff828080;font-size:12px;line-height:1.5;padding:6px 8px;margin:5px 0;border-radius:2px}
 .moderation-flash{animation:moderation-flash 1.2s ease-out}

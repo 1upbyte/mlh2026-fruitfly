@@ -66,6 +66,7 @@ export function makeVideoDraggable(inset, player, controls) {
   }
 
   inset.addEventListener('pointerdown', event => {
+    if (event.target.closest('.award-dismiss')) return;
     if (event.button !== 0 || drag) return;
     event.preventDefault();
     event.stopPropagation();

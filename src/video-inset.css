@@ -1,3 +1,4 @@
+.video-inset{container-type:inline-size}
 .video-resize{position:absolute;width:24px;height:24px;padding:0;border:0;background:none;z-index:1;touch-action:none;color:white;opacity:.65}
 .video-resize::after{content:'';position:absolute;width:8px;height:8px;filter:drop-shadow(0 1px 2px #000);border-color:currentColor;border-style:solid;border-width:0}
 .video-resize.top-left{top:0;left:0;cursor:nwse-resize}
