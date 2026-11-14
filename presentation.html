@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0e0e10">
+  <title>Smellcheck — Hackathon Presentation</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%239147ff'/%3E%3Ctext x='10' y='25' fill='white' font-size='29' font-family='Arial' font-weight='bold'%3ES%3C/text%3E%3C/svg%3E">
+  <style>
+    :root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif;background:#0e0e10;color:#efeff1;--purple:#a970ff}
+    *{box-sizing:border-box}body{margin:0;overflow:hidden}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid #bf94ff;outline-offset:7px}button:disabled{opacity:.2;cursor:default}
+    .deck{height:100svh;position:relative;isolation:isolate}.slide{position:absolute;inset:0;display:flex;align-items:center;padding:8vh 8vw 12vh;overflow:hidden;background:#0e0e10}.slide[hidden]{display:none}
+    .slide.active .reveal{animation:reveal .55s cubic-bezier(.2,.7,.2,1) both}.slide.active .delay{animation-delay:.12s}
+    h1,h2,p{margin:0}h1,h2{font-size:clamp(62px,9.7vw,168px);line-height:.92;letter-spacing:-.075em;font-weight:800}.accent{color:var(--purple)}
+    .title-copy{position:relative;z-index:2}.title-copy h1 span{display:block}.byline{margin-top:42px;font-size:clamp(16px,1.8vw,27px);letter-spacing:-.025em;color:#adadb8}.byline strong{color:#efeff1;font-weight:400}
+    .title-mark{position:absolute;right:6vw;top:50%;transform:translateY(-50%) rotate(-8deg);width:37vw;height:37vw;max-height:64vh;color:#a970ff;opacity:.9}
+    .title-mark:before{content:'';position:absolute;inset:12%;background:#9147ff;filter:blur(100px);opacity:.13}.title-mark svg{position:relative;width:100%;height:100%}
+    .meme-slide{gap:5vw;justify-content:space-between}.meme-slide h2{font-size:clamp(40px,5.4vw,88px);line-height:1.04;letter-spacing:-.055em;max-width:40%;flex-shrink:0}.meme-slide figure{margin:0;position:relative;max-width:58%;width:760px;transform:rotate(2deg)}.meme-slide figure:before{content:'';position:absolute;inset:0;background:#9147ff;transform:translate(12px,12px);z-index:-1}.meme-slide img{display:block;width:100%;max-height:66vh;object-fit:contain;background:#18181b;border:1px solid #ffffff20}
+    .intro-slide{background:#9147ff;color:white}.intro-copy{position:relative;z-index:2}.intro-copy p{font-size:clamp(17px,2vw,30px);letter-spacing:-.025em;color:#e4d5ff;margin-bottom:27px}.intro-copy h2{font-size:clamp(48px,7.3vw,124px)}.intro-copy h2 span{display:block}.intro-fly{position:absolute;right:2vw;top:50%;transform:translateY(-50%) rotate(-8deg);width:42vw;height:68vh;filter:drop-shadow(0 30px 25px #2b08634a)}
+    .demo-slide{justify-content:center;text-align:center}.demo-link{font-size:clamp(95px,19vw,280px);line-height:1;font-weight:800;letter-spacing:-.08em;color:#efeff1;text-decoration:none;display:inline-flex;align-items:center;gap:3vw}.demo-link svg{height:.32em;width:.32em;stroke:#a970ff;transition:transform .2s}.demo-link:hover{color:#bf94ff}.demo-link:hover svg{transform:translate(5px,-5px)}
+    .deck-chrome{position:fixed;bottom:25px;left:3vw;right:3vw;z-index:10;display:flex;align-items:center;gap:22px;pointer-events:none}.deck-chrome button{pointer-events:auto}.wordmark{font-size:11px;font-weight:700;letter-spacing:.06em;color:#85858f}.slide-count{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:#adadb8;letter-spacing:2px}.navigation{display:flex;gap:7px}.navigation button,.fullscreen{border:1px solid #ffffff20;background:#ffffff04;border-radius:5px;display:grid;place-items:center;width:35px;height:35px}.navigation button:hover:not(:disabled),.fullscreen:hover{background:#ffffff12}.deck-chrome svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.fullscreen{margin-left:4px;color:#adadb8}.intro-active .wordmark,.intro-active .slide-count{color:#e4d5ff}.intro-active .navigation button,.intro-active .fullscreen{border-color:#ffffff40;color:white}
+    .progress{position:fixed;bottom:0;left:0;height:3px;background:#a970ff;z-index:11;width:20%;transition:width .3s}.intro-active .progress{background:#e4d5ff}
+    @keyframes reveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:700px){.slide{padding:8vh 7vw 15vh}h1,h2{font-size:18vw}.title-mark{right:-15vw;width:70vw;height:70vw;opacity:.22}.title-copy{align-self:center}.byline{font-size:16px;max-width:230px;line-height:1.6;margin-top:28px}.meme-slide{flex-direction:column;justify-content:center;gap:35px;align-items:flex-start}.meme-slide h2{font-size:10vw;max-width:100%}.meme-slide figure{max-width:100%;width:100%;transform:rotate(1deg)}.meme-slide img{max-height:45vh}.intro-copy h2{font-size:12.5vw}.intro-fly{width:85vw;right:-28vw;opacity:.24}.intro-copy p{font-size:20px}.deck-chrome{left:6vw;right:6vw;gap:12px;bottom:20px}.wordmark{font-size:9px}.slide-count{font-size:10px}.navigation{gap:4px}.navigation button,.fullscreen{width:30px;height:30px}.demo-link{font-size:26vw}}
+    @media(prefers-reduced-motion:reduce){.slide.active .reveal{animation:none}.progress,.demo-link svg{transition:none}}
+    @media print{body{overflow:visible;background:white}.deck{height:auto}.slide,.slide[hidden]{display:flex!important;position:relative;height:100vh;break-after:page;print-color-adjust:exact;-webkit-print-color-adjust:exact}.deck-chrome,.progress{display:none}.slide .reveal{animation:none!important}}
+  </style>
+</head>
+<body>
+  <main class="deck" aria-label="Smellcheck presentation">
+    <section class="slide active" aria-label="Title" aria-roledescription="slide">
+      <div class="title-copy">
+        <h1 class="reveal"><span>Smell</span><span class="accent">check.</span></h1>
+        <p class="byline reveal delay">By <strong>Pablo, Saranga, Josh</strong></p>
+      </div>
+      <div class="title-mark" aria-hidden="true"><svg viewBox="0 0 240 280" fill="none"><path d="M30 12 10 58v170h60v40h38l40-40h50l32-36V12H30Z" stroke="currentColor" stroke-width="11"/><path d="M90 72v70m68-70v70" stroke="currentColor" stroke-width="16"/></svg></div>
+    </section>
+    <section class="slide meme-slide" aria-label="We all know Twitch users" aria-roledescription="slide" hidden>
+      <h2 class="reveal">We all know<br><span class="accent">Twitch users...</span></h2>
+      <figure class="reveal delay"><img src="/presentation/flight-reacts.gif" alt="FlightReacts reaction GIF" style="height:auto"><!-- Source: https://media1.tenor.com/m/_-P0__uT8ugAAAAC/flight-reacts.gif --></figure>
+    </section>
+    <section class="slide meme-slide" aria-label="And we all know Twitch mods" aria-roledescription="slide" hidden>
+      <h2 class="reveal">And we all know<br><span class="accent">Twitch mods...</span></h2>
+      <figure class="reveal delay"><img src="/presentation/twitch-mod-meme.jpg" alt="The South Park gamer meme: a gamer at his computer in a cluttered room." width="1280" height="720" style="height:auto"><!-- Source: https://imgflip.com/meme/291176769/WoW-Player-South-Park --></figure>
+    </section>
+    <section class="slide intro-slide" aria-label="Introducing Smellcheck" aria-roledescription="slide" hidden>
+      <div class="intro-copy"><p class="reveal">Introducing</p><h2 class="reveal delay">Smellcheck.</h2></div>
+      <svg class="intro-fly" viewBox="0 0 500 500" aria-hidden="true">
+        <defs><linearGradient id="body" x2="1" y2="1"><stop stop-color="#e5c8a0"/><stop offset="1" stop-color="#9e7351"/></linearGradient><linearGradient id="eye" x2=".8" y2="1"><stop stop-color="#ff8280"/><stop offset="1" stop-color="#c32245"/></linearGradient></defs>
+        <g stroke="#382044" stroke-width="7" stroke-linecap="round" fill="none"><path d="m215 271-65 13-40 78m114-57-57 57-10 63m119-154 65 13 40 78m-113-57 57 57 10 63m-99-176-64-16-45 28m156-12 64-16 45 28"/></g>
+        <ellipse cx="250" cy="330" rx="62" ry="91" fill="url(#body)" stroke="#6c4862" stroke-width="4"/><g stroke="#71515a" stroke-width="9" fill="none"><path d="M194 316q56 23 112 0m-114 32q58 25 116 0m-105 34q47 21 94 0"/></g>
+        <g fill="#e8dbff" fill-opacity=".65" stroke="#f3eaff" stroke-opacity=".8" stroke-width="3"><ellipse cx="153" cy="282" rx="42" ry="113" transform="rotate(-43 153 282)"/><ellipse cx="347" cy="282" rx="42" ry="113" transform="rotate(43 347 282)"/></g>
+        <g stroke="#fff" stroke-opacity=".4" stroke-width="2"><path d="m224 265-137 75m139-72-115 96m163-99 137 75m-139-72 115 96"/></g>
+        <ellipse cx="250" cy="239" rx="65" ry="71" fill="url(#body)"/><ellipse cx="250" cy="165" rx="68" ry="53" fill="#dfc098"/>
+        <ellipse cx="204" cy="160" rx="31" ry="41" transform="rotate(-13 204 160)" fill="url(#eye)"/><ellipse cx="296" cy="160" rx="31" ry="41" transform="rotate(13 296 160)" fill="url(#eye)"/>
+        <ellipse cx="194" cy="146" rx="9" ry="13" fill="#ffc7c4" opacity=".7"/><ellipse cx="287" cy="146" rx="9" ry="13" fill="#ffc7c4" opacity=".7"/>
+        <g stroke="#382044" stroke-width="6" stroke-linecap="round" fill="none"><path d="m233 117-12-29-16-7m62 36 12-29 16-7"/></g>
+      </svg>
+    </section>
+    <section class="slide demo-slide" aria-label="Demo" aria-roledescription="slide" hidden>
+      <a class="demo-link reveal" href="/" target="_blank" rel="noopener" aria-label="Demo — open the live app in a new tab">Demo<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+    </section>
+  </main>
+  <footer class="deck-chrome">
+    <span class="wordmark">SMELLCHECK</span>
+    <span class="slide-count" id="slide-count" aria-live="polite">01 / 05</span>
+    <nav class="navigation" aria-label="Presentation controls"><button id="previous" aria-label="Previous slide" title="Previous slide (←)" disabled><svg viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><button id="next" aria-label="Next slide" title="Next slide (→ or Space)"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button></nav>
+    <button class="fullscreen" id="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button>
+  </footer>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <script type="module">
+    const slides=[...document.querySelectorAll('.slide')];
+    let current=0;
+    function show(index,updateHash=true){
+      current=Math.max(0,Math.min(slides.length-1,index));
+      slides.forEach((slide,i)=>{slide.hidden=i!==current;slide.classList.toggle('active',i===current);});
+      document.getElementById('previous').disabled=current===0;
+      document.getElementById('next').disabled=current===slides.length-1;
+      document.getElementById('slide-count').textContent=`${String(current+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
+      document.getElementById('progress').style.width=`${(current+1)/slides.length*100}%`;
+      document.body.classList.toggle('intro-active',slides[current].classList.contains('intro-slide'));
+      if(updateHash) history.replaceState(null,'',`#${current+1}`);
+    }
+    function fromHash(){const number=Number(location.hash.slice(1));show(Number.isFinite(number)&&number>0?number-1:0,false);}
+    document.getElementById('previous').onclick=()=>show(current-1);
+    document.getElementById('next').onclick=()=>show(current+1);
+    async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{}}
+    document.getElementById('fullscreen').onclick=fullscreen;
+    document.addEventListener('fullscreenchange',()=>document.getElementById('fullscreen').setAttribute('aria-label',document.fullscreenElement?'Exit fullscreen':'Enter fullscreen'));
+    document.addEventListener('keydown',event=>{
+      if(event.altKey||event.ctrlKey||event.metaKey)return;
+      if(['ArrowRight','ArrowDown','PageDown'].includes(event.key)||(event.code==='Space'&&!event.target.closest?.('button,a'))){event.preventDefault();show(current+1);}
+      if(['ArrowLeft','ArrowUp','PageUp'].includes(event.key)){event.preventDefault();show(current-1);}
+      if(event.key==='Home'){event.preventDefault();show(0);}
+      if(event.key==='End'){event.preventDefault();show(slides.length-1);}
+      if(event.key.toLowerCase()==='f')fullscreen();
+    });
+    let touch=null;
+    document.querySelector('.deck').addEventListener('touchstart',event=>{touch={x:event.changedTouches[0].clientX,y:event.changedTouches[0].clientY};},{passive:true});
+    document.querySelector('.deck').addEventListener('touchend',event=>{if(!touch)return;const dx=event.changedTouches[0].clientX-touch.x,dy=event.changedTouches[0].clientY-touch.y;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy))show(current+(dx<0?1:-1));touch=null;},{passive:true});
+    window.addEventListener('hashchange',fromHash);
+    fromHash();
+  </script>
+</body>
+</html>

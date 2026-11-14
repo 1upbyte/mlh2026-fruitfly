@@ -103,6 +103,8 @@ about 8% of Kenyon cells per word and distinct patterns for different words:
 
 Run `npm install`, then `npm run dev`. Open the local URL printed by Vite.
 
+The hackathon presentation is at `/presentation.html` (normally `http://127.0.0.1:5173/presentation.html`). Use arrow keys or Space to advance, F for fullscreen, and Home/End for the first/last slide. The Demo link opens the app in a new tab. The five slides cover the title and team, the Twitch users GIF, the Twitch mod meme, the introduction to Smellcheck, and the demo. The GIF and meme image are bundled locally; [image source](https://imgflip.com/meme/291176769/WoW-Player-South-Park).
+
 `npm run build` produces the frontend in `dist`, including the example video and chat. `npm run preview` serves that build with the local moderation API. Use `npm run dev` or `npm run preview` for moderation; a plain static file server does not provide the API.
 
 Click Play to start the video and timestamped chat together. Drag the room to orbit, scroll to zoom, right-drag to pan, and click a workstation to focus. Add or remove flies with the buttons under the player (1–20). Each fly receives message indices matching its position in a round-robin distribution. Changing the population redistributes the visible chat across the remaining screens.

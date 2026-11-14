@@ -3,6 +3,14 @@ import { readFile } from 'node:fs/promises';
 import { moderationPlugin } from './server/moderation.js';
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        app: new URL('./index.html', import.meta.url).pathname,
+        presentation: new URL('./presentation.html', import.meta.url).pathname,
+      },
+    },
+  },
   plugins: [moderationPlugin(), {
     name: 'example-media',
     async generateBundle() {
