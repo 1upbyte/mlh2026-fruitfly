@@ -1,0 +1,50 @@
+.moderation-panel{padding:12px;border-top:1px solid var(--border);flex-shrink:0;background:#18181b}
+.mod-heading{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.mod-heading h3{font-size:11px;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:.3px}
+.mod-connection{width:6px;height:6px;border-radius:50%;background:#85858f}
+.mod-connection.connected{background:#00c884}
+.mod-heading>button{margin-left:auto;font-size:10px;color:#adadb8;padding:2px 4px;border-radius:3px}
+.mod-heading>button:hover{background:#ffffff12}
+.mod-target{padding:8px 10px;background:#ffffff06;border:1px solid #ffffff12;border-radius:4px;margin-bottom:9px;min-height:33px}
+.mod-target b{font-size:12px;color:#bf94ff;overflow-wrap:anywhere}
+.mod-target p{font-size:11px;color:#adadb8;line-height:1.45;margin:4px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.mod-target p:empty{display:none}
+.mod-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.mod-actions button{background:#ffffff0d;border:1px solid #ffffff0b;border-radius:4px;font-size:10px;font-weight:600;padding:8px 3px;gap:4px;white-space:nowrap}
+.mod-actions button svg{width:12px;height:12px}
+.mod-actions button:hover:not(:disabled){background:#ffffff18}
+.mod-actions [data-mod-action=ban]{color:#ff8280}
+.mod-actions .mod-award-button{color:#ffdc85;background:#d6a74214;border-color:#d6a74230}
+.mod-actions [aria-pressed=true]{color:#bf94ff;background:#9147ff25;border-color:#9147ff80}
+.mod-user-state,.mod-error{font-size:10px;line-height:1.5;margin:8px 0 0;overflow-wrap:anywhere}
+.mod-user-state{color:#bf94ff}.mod-error{color:#ff8280}
+.mod-user-state:empty,.mod-error:empty{display:none}
+.chat-message{cursor:pointer;border-radius:3px;padding-left:4px;padding-right:4px;margin-left:-4px;margin-right:-4px}
+.chat-message:hover{background:#ffffff0a}
+.chat-message[aria-pressed=true]{background:#9147ff26;box-shadow:inset 2px 0 #a970ff}
+.chat-message:focus-visible{outline:1px solid #a970ff;outline-offset:1px}
+.warned-badge{display:inline-block;font-size:9px;color:#e5b75b;border:1px solid #e5b75b50;border-radius:3px;padding:0 3px;margin-left:5px;line-height:1.5}
+.resume-chat{bottom:350px}
+.award-overlay{position:absolute;inset:0;z-index:8;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#46286be8,#100d1bf2 70%);isolation:isolate}
+.award-dismiss{position:absolute;right:12px;top:12px;z-index:3;background:#ffffff0c}
+.award-card{text-align:center;position:relative;z-index:2;width:min(80%,600px);max-height:100%;overflow:auto;padding:20px 8px;scrollbar-width:thin}
+.award-trophy{display:grid;place-items:center;margin:0 auto 14px;width:74px;height:74px;color:#ffdf8b;border:1px solid #ffdb7a65;border-radius:50%;background:radial-gradient(#ffd87725,#ffd87705);box-shadow:0 0 40px #ffdb7a25,inset 0 0 20px #ffdb7a15}
+.award-trophy svg{width:36px;height:36px;filter:drop-shadow(0 0 9px #ffd87780)}
+.award-card h2{font-size:11px;text-transform:uppercase;letter-spacing:4px;color:#ffdf8b;margin:0 0 14px}
+.award-card h3{font-size:clamp(20px,3vw,38px);line-height:1.15;margin:0 0 16px;font-weight:800;color:#fff1cc;text-shadow:0 0 28px #ffdb7a60;overflow-wrap:anywhere}
+.award-card blockquote{margin:0 auto 22px;padding:17px 22px;color:#efeff1;font-size:clamp(13px,1.5vw,20px);line-height:1.5;border:1px solid #ffdb7a35;border-radius:7px;background:#ffffff08;overflow-wrap:anywhere;white-space:pre-wrap;max-height:130px;overflow:auto}
+.award-card .primary-button{background:#f4ce77;color:#26183a;padding:10px 16px}
+.award-rays{position:absolute;width:150vmax;height:150vmax;left:50%;top:50%;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,#ffdc7a09 0deg 12deg,transparent 12deg 28deg);mask-image:radial-gradient(black,transparent 65%);pointer-events:none}
+.celebrate .award-rays{animation:award-spin 40s linear infinite}
+.celebrate .award-card{animation:award-enter .7s cubic-bezier(.16,1,.3,1) both}
+.celebrate .award-trophy{animation:trophy-enter 1s cubic-bezier(.2,.8,.25,1.3) both,trophy-glow 2.4s 1s ease-in-out infinite alternate}
+.award-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.award-particles span{position:absolute;left:50%;top:42%;width:6px;height:10px;background:var(--color);border-radius:1px;opacity:0;transform:rotate(var(--angle))}
+.celebrate .award-particles span{animation:award-burst 2.6s var(--delay) cubic-bezier(.12,.5,.35,1) both}
+@keyframes award-enter{from{opacity:0;transform:translateY(25px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes trophy-enter{0%{transform:scale(.1) rotate(-25deg);opacity:0}70%{transform:scale(1.15) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes trophy-glow{from{box-shadow:0 0 25px #ffdb7a20}to{box-shadow:0 0 65px #ffdb7a55}}
+@keyframes award-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes award-burst{0%{opacity:0;transform:rotate(var(--angle)) translateY(0) rotate(0)}10%{opacity:1}65%{opacity:1}100%{opacity:0;transform:rotate(var(--angle)) translateY(var(--distance)) rotate(300deg)}}
+@media(max-width:720px){.chat-panel{height:640px}.award-card{padding:12px 6px}.award-trophy{width:36px;height:36px;margin-bottom:7px}.award-trophy svg{width:21px;height:21px}.award-card h2{font-size:9px;letter-spacing:2px;margin-bottom:6px}.award-card h3{font-size:18px;margin-bottom:8px}.award-card blockquote{padding:8px;font-size:12px;margin-bottom:10px;max-height:55px}.award-card .primary-button{padding:6px 10px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){.celebrate .award-card,.celebrate .award-trophy,.celebrate .award-rays,.celebrate .award-particles span{animation:none}}

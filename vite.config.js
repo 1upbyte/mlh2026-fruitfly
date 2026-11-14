@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import { readFile } from 'node:fs/promises';
+import { moderationPlugin } from './server/moderation.js';
 
 export default defineConfig({
-  plugins: [{
+  plugins: [moderationPlugin(), {
     name: 'example-media',
     async generateBundle() {
       for (const fileName of ['xqc1.txt', 'xqc1.mp4']) {

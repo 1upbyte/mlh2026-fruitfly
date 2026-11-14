@@ -103,10 +103,47 @@ about 8% of Kenyon cells per word and distinct patterns for different words:
 
 Run `npm install`, then `npm run dev`. Open the local URL printed by Vite.
 
-`npm run build` produces a static site in `dist`, including the example video and chat. `npm run preview` serves that build locally.
+`npm run build` produces the frontend in `dist`, including the example video and chat. `npm run preview` serves that build with the local moderation API. Use `npm run dev` or `npm run preview` for moderation; a plain static file server does not provide the API.
 
 Click Play to start the video and timestamped chat together. Drag the room to orbit, scroll to zoom, right-drag to pan, and click a workstation to focus. Add or remove flies with the buttons under the player (1–20). Each fly receives message indices matching its position in a round-robin distribution. Changing the population redistributes the visible chat across the remaining screens.
 
 Load your own chat and video from Session. Chat accepts `[H:MM:SS] username: message` logs, including midnight rollover, or plain text (one message per second). The first timestamp is video time zero. A positive chat offset delays chat relative to video. Seeking and playback speed changes apply to both. The chat dropdown shows the messages assigned to a particular fly.
 
 Files stay in the browser. The interface uses Three.js and Lucide icons.
+
+## Moderation
+
+Select a message in chat, then use Ban, Mute, Timeout 30s, Warn, or Mod Award. Ban and mute hide all past and future messages for that username in chat and on the flies' monitors. Timeout does the same for 30 seconds of real time, including while playback is paused. Usernames match without regard to case. Warn adds a warning badge without hiding messages. Slow 30s toggles a global per-user cooldown, measured using message timestamps, keeping at most one message per user in each 30-second interval. Message indices remain unchanged, so moderation preserves fly assignments.
+
+Mod Award pauses video and chat and presents the selected username and message over the room, with a trophy, rays, and confetti. Resume stream dismisses the award and continues playback; the close button dismisses it while leaving playback paused. Reset clears moderation and active awards. The session is shared by all open tabs and held in server memory; restarting the local server clears it.
+
+## Local API
+
+All endpoints are unauthenticated, with CORS enabled for this local demo. The base URL is the server's printed URL (normally `http://127.0.0.1:5173` in development or port `4173` for preview). POST JSON with `Content-Type: application/json`.
+
+| Endpoint | Body | Effect |
+| --- | --- | --- |
+| `POST /api/ban` | `{"username":"example"}` | Hide the user's messages until reset. |
+| `POST /api/mute` | `{"username":"example"}` | Hide the user's messages until reset. |
+| `POST /api/timeout` | `{"username":"example"}` | Hide the user's messages for 30 seconds. |
+| `POST /api/warn` | `{"username":"example"}` | Increment the user's warning count. |
+| `POST /api/slow` | `{"enabled":true}` | Enable the 30-second per-user cooldown; `false` disables it. |
+| `POST /api/mod-award` | `{"username":"example","message":"Great message","messageId":0}` | Pause connected players and show the award. `messageId` is optional. |
+| `POST /api/dismiss-award` | `{"awardId":"id from state.award.id"}` | Dismiss that award; players remain paused. |
+| `POST /api/reset` | `{}` | Clear moderation and awards. |
+| `GET /api/state` | — | Read the current session, users, slow mode, and active award. |
+| `GET /api/events` | — | Subscribe to server-sent state updates, including an initial snapshot. |
+
+Each successful POST returns the current state. External API calls affect connected browsers immediately. Awards sent without an open browser remain active and appear when the page connects. Browser-uploaded logs and videos are not sent to the API; external award requests supply the username and message explicitly.
+
+```sh
+curl -X POST http://127.0.0.1:5173/api/ban \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"KLF_KLF"}'
+
+curl -X POST http://127.0.0.1:5173/api/mod-award \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"KLF_KLF","message":"JEAN WALL"}'
+```
+
+Run `npm test` for moderation behavior and HTTP/SSE integration checks.

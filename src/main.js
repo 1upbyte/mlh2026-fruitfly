@@ -1,11 +1,13 @@
 import './style.css';
-import { createIcons, Ellipsis, Search, Volume2, VolumeX, Upload, PanelLeftClose, Film, MessagesSquare, FolderOpen, Mouse, RotateCcw, Play, Pause, SkipBack, Maximize, Plus, Minus, Users, History, PanelRightClose, PanelRightOpen, ListFilter, ArrowDown, Smile, Settings } from 'lucide';
+import './moderation.css';
+import { createIcons, Ellipsis, Search, Volume2, VolumeX, Upload, PanelLeftClose, Film, MessagesSquare, FolderOpen, Mouse, RotateCcw, Play, Pause, SkipBack, Maximize, Plus, Minus, Users, History, PanelRightClose, PanelRightOpen, ListFilter, ArrowDown, Smile, Settings, Ban, MessageSquareOff, Timer, ShieldAlert, Gauge, Trophy, X } from 'lucide';
 import { createRoom } from './room.js';
 import { makeVideoDraggable } from './video-inset.js';
+import { createModeration } from './moderation.js';
 import { parseChat, assignedTo, visibleMessages, userColor } from './chat.js';
 
 const $=id=>document.getElementById(id);
-const icons={Ellipsis, Search, Volume2, VolumeX, Upload, PanelLeftClose, Film, MessagesSquare, FolderOpen, Mouse, RotateCcw, Play, Pause, SkipBack, Maximize, Plus, Minus, Users, History, PanelRightClose, PanelRightOpen, ListFilter, ArrowDown, Smile, Settings};
+const icons={Ellipsis, Search, Volume2, VolumeX, Upload, PanelLeftClose, Film, MessagesSquare, FolderOpen, Mouse, RotateCcw, Play, Pause, SkipBack, Maximize, Plus, Minus, Users, History, PanelRightClose, PanelRightOpen, ListFilter, ArrowDown, Smile, Settings, Ban, MessageSquareOff, Timer, ShieldAlert, Gauge, Trophy, X};
 const refreshIcons=()=>createIcons({icons,attrs:{'stroke-width':1.8}});
 refreshIcons();
 const video=$('video');video.src='/xqc1.mp4';video.volume=.6;
@@ -19,22 +21,27 @@ catch(error){$('loading').textContent='3D rendering is unavailable. Enable WebGL
 function format(seconds){if(!Number.isFinite(seconds))return '0:00';const s=Math.max(0,Math.floor(seconds));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
 function currentMessages(){return [...visibleMessages(messages,video.currentTime,offset),...manualMessages.filter(m=>m.time<=video.currentTime)].sort((a,b)=>a.time-b.time||a.index-b.index);}
 function renderChat(force=false){
-  const visible=currentMessages();room?.update(visible);
+  const visible=moderation.filter(currentMessages());room?.update(visible);
   const filter=$('chat-filter').value;
   const filtered=visible.filter(m=>(filter==='all'||assignedTo(m.index,count)===+filter)&&(!query||`${m.user} ${m.text}`.toLowerCase().includes(query)));
-  const key=filtered.map(m=>m.index).join(',')+':'+filter+':'+query;
+  const key=filtered.map(m=>m.index).join(',')+':'+filter+':'+query+':'+moderation.revision+':'+moderation.selectedIndex;
   $('chat-count').textContent=filtered.length;
   if(!force&&lastChatKey===key)return;lastChatKey=key;
   const fragment=document.createDocumentFragment();
   for(const m of filtered.slice(-500)){const line=document.createElement('div');line.className='chat-message';line.dataset.index=m.index;
+    line.tabIndex=0;line.setAttribute('role','button');line.setAttribute('aria-pressed',String(m.index===moderation.selectedIndex));
+    line.onclick=()=>moderation.select(m);line.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();moderation.select(m);}};
     const stamp=document.createElement('span');stamp.className='timestamp';stamp.textContent=format(m.time);line.append(stamp);
-    const user=document.createElement('b');user.textContent=m.user;user.style.color=userColor(m.user);line.append(user,document.createTextNode(`: ${m.text}`));fragment.append(line);}
+    const user=document.createElement('b');user.textContent=m.user;user.style.color=userColor(m.user);line.append(user,document.createTextNode(`: ${m.text}`));
+    if(moderation.warned(m.user)){const badge=document.createElement('span');badge.className='warned-badge';badge.textContent='Warned';line.append(badge);}
+    fragment.append(line);}
   const oldScroll=$('chat-messages').scrollTop;$('chat-messages').replaceChildren(fragment);$('chat-messages').scrollTop=autoScroll?$('chat-messages').scrollHeight:oldScroll;
 }
 function update(){const duration=video.duration||0;$('time').textContent=`${format(video.currentTime)} / ${format(duration)}`;$('elapsed').textContent=format(video.currentTime);$('timeline').max=duration||100;$('timeline').value=video.currentTime;renderChat();}
 function playbackState(){icon($('play'),video.paused?'play':'pause');$('play').setAttribute('aria-label',video.paused?'Play':'Pause');$('live-badge').textContent=video.paused?'REPLAY':'PLAYING';}
 async function play(){try{if(video.ended)video.currentTime=0;await video.play();}catch(error){status(`Unable to play this video: ${error.message}`);}}
-$('play').onclick=()=>video.paused?play():video.pause();
+$('play').onclick=()=>moderation.awardActive?moderation.dismissAndResume():video.paused?play():video.pause();
+video.addEventListener('play',()=>{if(moderation.awardActive)video.pause();});
 video.addEventListener('play',playbackState);video.addEventListener('pause',playbackState);video.addEventListener('ended',playbackState);
 for(const event of ['timeupdate','seeked','loadedmetadata','durationchange'])video.addEventListener(event,update);
 video.addEventListener('error',()=>status('Unable to load the video. Select a browser-compatible video file.'));
@@ -68,8 +75,9 @@ $('following').onclick=()=>{document.body.classList.remove('sidebar-collapsed');
 $('browse').onclick=()=>{$('browse').classList.add('active');$('following').classList.remove('active');$('player').scrollIntoView({behavior:'smooth'});};
 $('more').onclick=()=>document.querySelector('.settings-card').scrollIntoView({behavior:'smooth'});
 $('channel').onclick=()=>$('player').scrollIntoView({behavior:'smooth'});
-function loadChat(text,name){const parsed=parseChat(text);if(!parsed.length){status('No messages found in this file.');return;}messages=parsed;manualMessages=[];$('chat-filename').textContent=name;$('chat-status').textContent=name;$('message-total').textContent=`${messages.length.toLocaleString()} messages`;status('');autoScroll=true;renderChat(true);}
+function loadChat(text,name){const parsed=parseChat(text);if(!parsed.length){status('No messages found in this file.');return;}messages=parsed;manualMessages=[];moderation.clearSelection();$('chat-filename').textContent=name;$('chat-status').textContent=name;$('message-total').textContent=`${messages.length.toLocaleString()} messages`;status('');autoScroll=true;renderChat(true);}
 $('chat-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{loadChat(await file.text(),file.name);}catch{status('Unable to read this chat file.');}e.target.value='';};
 $('video-file').onchange=e=>{const file=e.target.files[0];if(!file)return;video.pause();if(videoObjectUrl)URL.revokeObjectURL(videoObjectUrl);videoObjectUrl=URL.createObjectURL(file);video.src=videoObjectUrl;for(const id of ['video-filename','video-status','inset-label'])$(id).textContent=file.name;status('');e.target.value='';};
+const moderation=createModeration({onChange:()=>renderChat(true),pause:()=>video.pause(),resume:play,refreshIcons});
 try{const response=await fetch('/xqc1.txt');if(!response.ok)throw new Error('Chat file not found');loadChat(await response.text(),'xqc1.txt');}catch(error){status(`Unable to load the example chat: ${error.message}`);}
 update();
