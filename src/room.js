@@ -157,5 +157,5 @@ export function createRoom(container, onFocus) {
     }
     renderer.render(scene,camera);
   });
-  return { setCount, reset, focus, update(messages){for(const item of stations){const assigned=messages.filter(m=>m.index%stations.length===item.index);const key=assigned.map(m=>m.index).join(',');if(key!==item.lastKey){drawScreen(item,assigned);item.lastKey=key;}}}, get count(){return stations.length;},get focused(){return focusIndex;} };
+  return { setCount, reset, focus, update(messages){for(const item of stations){const assigned=messages.filter(m=>m.index%stations.length===item.index);const key=JSON.stringify(assigned.slice(-18).map(m=>[m.index,m.user,m.text]));if(key!==item.lastKey){drawScreen(item,assigned);item.lastKey=key;}}}, get count(){return stations.length;},get focused(){return focusIndex;} };
 }
