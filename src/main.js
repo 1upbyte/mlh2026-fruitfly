@@ -11,7 +11,7 @@ const $=id=>document.getElementById(id);
 const icons={Ellipsis, Search, Volume2, VolumeX, Upload, PanelLeftClose, Film, MessagesSquare, FolderOpen, Mouse, RotateCcw, Play, Pause, SkipBack, Maximize, Plus, Minus, Users, History, PanelRightClose, PanelRightOpen, ListFilter, ArrowDown, Smile, Settings, Ban, MessageSquareOff, Timer, ShieldAlert, Gauge, Trophy, X};
 const refreshIcons=()=>createIcons({icons,attrs:{'stroke-width':1.8}});
 refreshIcons();
-const video=$('video');video.src='/xqc1.mp4';video.volume=.6;
+const video=$('video');video.volume=.6;
 makeVideoDraggable($('video-inset'), $('player'), document.querySelector('.player-controls'));
 let messages=[],manualMessages=[],count=1,offset=0,query='',lastChatKey='',autoScroll=true,videoObjectUrl=null;
 let room;
@@ -83,9 +83,31 @@ $('browse').onclick=()=>{$('browse').classList.add('active');$('following').clas
 $('more').onclick=()=>document.querySelector('.settings-card').scrollIntoView({behavior:'smooth'});
 $('channel').onclick=()=>$('player').scrollIntoView({behavior:'smooth'});
 function loadChat(text,name){const parsed=parseChat(text);if(!parsed.length){status('No messages found in this file.');return;}messages=parsed;manualMessages=[];fly.clear();$('chat-filename').textContent=name;$('chat-status').textContent=name;$('message-total').textContent=`${messages.length.toLocaleString()} messages`;status('');autoScroll=true;renderChat(true);fly.load(messages);}
-$('chat-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{loadChat(await file.text(),file.name);}catch{status('Unable to read this chat file.');}e.target.value='';};
-$('video-file').onchange=e=>{const file=e.target.files[0];if(!file)return;video.pause();if(videoObjectUrl)URL.revokeObjectURL(videoObjectUrl);videoObjectUrl=URL.createObjectURL(file);video.src=videoObjectUrl;for(const id of ['video-filename','video-status','inset-label'])$(id).textContent=file.name;status('');e.target.value='';};
+$('chat-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{loadChat(await file.text(),file.name);$('recording').value='custom';}catch{status('Unable to read this chat file.');}e.target.value='';};
+$('video-file').onchange=e=>{const file=e.target.files[0];if(!file)return;video.pause();if(videoObjectUrl)URL.revokeObjectURL(videoObjectUrl);videoObjectUrl=URL.createObjectURL(file);video.src=videoObjectUrl;for(const id of ['video-filename','video-status','inset-label'])$(id).textContent=file.name;$('recording').value='custom';status('');e.target.value='';};
+let activeRecording='xqc1';
+async function loadRecording(id){
+  if(!['xqc1','xqc2'].includes(id))return;
+  $('recording').disabled=true;
+  try{
+    const response=await fetch(`/${id}.txt`);
+    if(!response.ok)throw new Error('Chat file not found.');
+    const text=await response.text();
+    if(!parseChat(text).length)throw new Error('The chat log is empty.');
+    video.pause();
+    if(videoObjectUrl){URL.revokeObjectURL(videoObjectUrl);videoObjectUrl=null;}
+    video.src=`/${id}.mp4`;
+    video.playbackRate=+$('speed').value;
+    offset=0;$('offset').value=0;
+    for(const label of ['video-filename','video-status','inset-label'])$(label).textContent=`${id}.mp4`;
+    loadChat(text,`${id}.txt`);
+    activeRecording=id;$('recording').value=id;
+    update();
+  }catch(error){$('recording').value=activeRecording;status(`Unable to load ${id}: ${error.message}`);}
+  finally{$('recording').disabled=false;}
+}
+$('recording').onchange=event=>loadRecording(event.target.value);
 const moderation=createModeration({onChange:()=>renderChat(true),pause:()=>video.pause(),resume:play,refreshIcons});
 const fly=createFlyMod({onChange:()=>renderChat(true),flyFor:m=>assignedTo(m.index,count),awardActive:()=>moderation.awardActive});
-try{const response=await fetch('/xqc1.txt');if(!response.ok)throw new Error('Chat file not found');loadChat(await response.text(),'xqc1.txt');}catch(error){status(`Unable to load the example chat: ${error.message}`);}
+await loadRecording('xqc1');
 update();

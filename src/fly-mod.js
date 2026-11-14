@@ -10,6 +10,7 @@ export function createFlyMod({ onChange, flyFor, awardActive }) {
   const acted = new WeakSet();
   const notices = [];
   let thresholds = null, enabled = true, queue = Promise.resolve();
+  let generation = 0;
 
   function render(note) {
     $('fly-auto').setAttribute('aria-pressed', String(enabled));
@@ -33,17 +34,20 @@ export function createFlyMod({ onChange, flyFor, awardActive }) {
 
   // Sniff every word of these messages, then attach a verdict to each message.
   async function load(messages) {
+    const session = generation;
     const words = [...new Set(messages.flatMap(message => tokenize(message.text)))].filter(word => !smells.has(word));
     for (let start = 0; start < words.length; start += 100) {
       try {
         const response = await fetch('/api/fly/smell', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ words: words.slice(start, start + 100) }) });
         const result = await response.json();
+        if (session !== generation) return;
         if (!response.ok) throw new Error(result.error);
         thresholds = result.thresholds;
         for (const [word, smell] of Object.entries(result.smells)) smells.set(word, smell);
         if (!thresholds) throw new Error('no trained fly');
         render(start + 100 < words.length ? `Sniffing words… ${start + 100}/${words.length}` : result.live || !words.some(word => smells.get(word) === null) ? '' : 'Some words are unsniffed (treated as neutral): the Python fly is not running.');
       } catch (error) {
+        if (session !== generation) return;
         render(`The fly is offline (${error.message}).`);
         return;
       }
@@ -55,13 +59,15 @@ export function createFlyMod({ onChange, flyFor, awardActive }) {
   }
 
   function act(message) {
+    const session = generation;
     const { action } = message.verdict;
     queue = queue.then(async () => {
+      if (session !== generation) return;
       if (action === 'mod-award' && awardActive()) return;   // one celebration at a time
       const body = action === 'slow' ? { enabled: true } : { username: message.user, ...(action === 'mod-award' ? { message: message.text, messageId: message.index } : {}) };
       try {
         const response = await fetch(`/api/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        if (!response.ok) return;
+        if (!response.ok || session !== generation) return;
         const text = notice(action, message.user);
         if (text) notices.push({ notice: text, time: message.time, index: message.index + .5, fly: flyFor(message), manual: message.user === 'you' });
         onChange();
@@ -83,7 +89,7 @@ export function createFlyMod({ onChange, flyFor, awardActive }) {
       }
     },
     get notices() { return notices; },
-    clear() { notices.length = 0; },
+    clear() { generation++; notices.length = 0; },
     describe(message) {
       const verdict = message?.verdict;
       return verdict ? `Fly smells ${verdict.stink.toFixed(1)}${verdict.worst ? ` (worst word “${verdict.worst}”)` : ''} → ${verdict.label || 'no action'}` : '';
